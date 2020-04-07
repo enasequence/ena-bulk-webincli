@@ -5,8 +5,8 @@ This can be used individually, however has been created to carry out batch proce
 `python read_validator.py --spreadsheet [PATH_TO_SPREADSHEET]`
 The spreadsheet should include the run name (e.g. prefix before .fastq), directory housing fastq file(s) and the manifest file:<br>
 E.g.<br>
-run   directory   manifest<br>
-my_run    /pathto/fastqs/   /pathto/manifest.txt<br>
+run  directory  manifest<br>
+my_run   /pathto/fastqs/  /pathto/manifest.txt<br>
 
 To run in batch, the script utilises available cores on the host machine.
 
