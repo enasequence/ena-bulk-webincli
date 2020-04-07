@@ -3,10 +3,10 @@ This validates read data to be submitted to the ENA using Webin-CLI.
 
 This can be used individually, however has been created to carry out batch processing:
 `python read_validator.py --spreadsheet [PATH_TO_SPREADSHEET]`
-The spreadsheet should include the run name (e.g. prefix before .fastq), directory housing fastq file(s) and the manifest file:
+The spreadsheet should include the run name (e.g. prefix before .fastq), directory housing fastq file(s) and the manifest file:<br>
 E.g.
-⋅⋅⋅run directory manifest
-⋅⋅⋅my_run  /pathto/fastqs/  /pathto/manifest.txt
+run\tdirectory\tmanifest
+my_run\t/pathto/fastqs/\t/pathto/manifest.txt<br>
 
 To run in batch, the script utilises available cores on the host machine.
 
