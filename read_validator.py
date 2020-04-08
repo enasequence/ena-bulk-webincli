@@ -4,13 +4,15 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 
-# Configuration
-WEBIN_CLI_JAR_PATH = '/Users/rahman/Documents/Courses_Training/SubmissionTraining/webin-cli-2.1.0.jar'
+######## Configuration - Assign these values before running the script
+WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.1.0.jar'
 WEBIN_USERNAME = os.environ.get('WEBIN_USERNAME')
 WEBIN_PASSWORD = os.environ.get('WEBIN_PASSWORD')
 
 num_cores = multiprocessing.cpu_count()
 print('Number of cores to use: {}'.format(num_cores))
+########
+
 
 
 def get_args():
@@ -41,8 +43,8 @@ def webin_cli_validate(run_id, manifest_file, upload_file_dir):
     log_path_err = os.path.join(output_dir, run_id + '.err')
     log_path_out = os.path.join(output_dir, run_id + '.out')
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
-    command = "java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -validate".format(
-        WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir
+    command = "mkdir {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -validate".format(
+        output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir
     )
     print("*" * 100)
     print("""Command to be executed:
@@ -57,7 +59,7 @@ def webin_cli_validate(run_id, manifest_file, upload_file_dir):
             run_file.write(run_id+"\n")
         if out:
             if 'The submission has been validated successfully.' in str(out):
-                out_file.write(out)
+                out_file.write(str(out))
                 out_file.write('VALIDATION SUCCESSFUL')
             else:
                 err_file.write(str(out))
