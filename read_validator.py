@@ -6,8 +6,6 @@ import multiprocessing
 
 ######## Configuration - Assign these values before running the script
 WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.1.0.jar'
-WEBIN_USERNAME = os.environ.get('WEBIN_USERNAME')
-WEBIN_PASSWORD = os.environ.get('WEBIN_PASSWORD')
 
 num_cores = multiprocessing.cpu_count()
 print('Number of cores to use: {}'.format(num_cores))
@@ -21,6 +19,8 @@ def get_args():
     :return: Script arguments
     """
     parser = argparse.ArgumentParser(description="Validate runs submitted")
+    parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
+    parser.add_argument('-p', '--password', help='password for Webin submission account.', type=str, required=True)
     parser.add_argument('-d', '--directory', help='parent directory of runs to be submitted')
     parser.add_argument('-r', '--run', help='accession of run to be processed', type=str, required=False)
     parser.add_argument('-m', '--manifest', help='manifest file used to submit the run', type=str, required=False)
@@ -33,7 +33,7 @@ def get_args():
     return args
 
 
-def webin_cli_validate(run_id, manifest_file, upload_file_dir):
+def webin_cli_validate(WEBIN_USERNAME, WEBIN_PASSWORD, run_id, manifest_file, upload_file_dir):
     """
     Run Webin-CLI validation of reads
     :param manifest_file: Path to manifest file used when submitting reads
@@ -43,7 +43,7 @@ def webin_cli_validate(run_id, manifest_file, upload_file_dir):
     log_path_err = os.path.join(output_dir, run_id + '.err')
     log_path_out = os.path.join(output_dir, run_id + '.out')
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
-    command = "mkdir {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -validate".format(
+    command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -validate".format(
         output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir
     )
     print("*" * 100)
@@ -71,13 +71,16 @@ def webin_cli_validate(run_id, manifest_file, upload_file_dir):
 
 if __name__ == '__main__':
     args = get_args()
+    webin_username = args.username
+    webin_password = args.password
+
 
     if args.spreadsheet:
         # Batch validate runs using spreadsheet
         to_validate = pd.read_csv(args.spreadsheet, sep='\t')
         # for index, row in to_validate.iterrows():
         #     webin_cli_validate(row[0], row[1], row[2])      # Parallelise this
-        results = Parallel(n_jobs=num_cores)(delayed(webin_cli_validate)(row[0], row[2], row[1]) for index,row in to_validate.iterrows())
+        results = Parallel(n_jobs=num_cores)(delayed(webin_cli_validate)(webin_username, webin_password, row[0], row[2], row[1]) for index,row in to_validate.iterrows())
     else:
         # Run validation on script arguments
         run_id = args.run
