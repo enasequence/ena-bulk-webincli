@@ -1,0 +1,2 @@
+Run	Directory	Manifest
+test	pathto/fastqs	pathto/Manifest.txt
