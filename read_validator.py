@@ -1,16 +1,19 @@
 import argparse, os, subprocess
 import pandas as pd
 from joblib import Parallel, delayed
+from pathlib import Path
 import multiprocessing
 
 
 ######## Configuration - Assign these values before running the script
 WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.1.0.jar'
+########
 
 num_cores = multiprocessing.cpu_count()
 print('Number of cores to use: {}'.format(num_cores))
-########
 
+# Mapping the field names between the submitted user metadata spreadsheet and the manifest file fields
+spreadsheet_column_mapping = {'study_accession': 'study', 'sample_accession': 'sample', 'experiment_name': 'name', 'sequencing_platform': 'platform', 'sequencing_instrument': 'instrument', 'library_description': 'description'}
 
 
 def get_args():
@@ -21,30 +24,76 @@ def get_args():
     parser = argparse.ArgumentParser(description="Validate runs submitted")
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
     parser.add_argument('-p', '--password', help='password for Webin submission account.', type=str, required=True)
-    parser.add_argument('-d', '--directory', help='parent directory of runs to be submitted')
-    parser.add_argument('-r', '--run', help='accession of run to be processed', type=str, required=False)
-    parser.add_argument('-m', '--manifest', help='manifest file used to submit the run', type=str, required=False)
-    parser.add_argument('-s', '--spreadsheet', help="spreadsheet (TSV file) with stored values for batch processing", type=str, required=False)
-        # If using spreadsheet, these are columns used:
-        #       1. Run (Name of the run (everything minus the suffix - e.g.fastq.gz))
-        #       2. Directory (Directory where fastq files are housed)
-        #       3. Manifest (Full path to manifest file - including name of manifest)
+    parser.add_argument('-d', '--directory', help='parent directory of data files', type=str, required=False)
+    parser.add_argument('-s', '--spreadsheet', help='name of spreadsheet with metadata', type=str, required=True)
+    parser.add_argument('-m', '--mode', type=str, help='options for mode are validate/submit', choices=['validate', 'submit'], nargs='?', required=False)
     args = parser.parse_args()
+
+    if args.mode is None:
+        args.mode = "validate"
     return args
 
 
-def webin_cli_validate(WEBIN_USERNAME, WEBIN_PASSWORD, run_id, manifest_file, upload_file_dir):
+def create_manifest(row, directory=""):
+    """
+    Create a manifest file for each submission
+    :param experiment_meta: Row of metadata from spreadsheet which will be used for the manifest file(s) in submission/validation
+    :param directory: Parent directory of data files, to save manifest files to
+    :return: List of successful creations of manifest file
+    """
+    row = row.dropna()
+    experiment_meta = row.to_dict()     # Gets a row of data and keeps name of column as an index
+
+    to_process = experiment_meta.get('uploaded file 1')
+    prefix = os.path.splitext(os.path.splitext(to_process)[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
+    manifest_file = os.path.join(directory, "Manifest_{}.txt".format(prefix))
+    successful = []
+    failed = []
+
+    for item in experiment_meta.items():
+        field = item[0]
+        value = item[1]
+        if field in spreadsheet_column_mapping:
+            field = spreadsheet_column_mapping.get(field)           # Get the manifest file field name for the spreadsheet column header
+        elif field == "uploaded file 1" or "uploaded file 2":
+            if ".fastq" in str(value) or ".fq" in str(value):
+                field = 'fastq'
+            elif ".cram" in str(value):
+                field = 'cram'
+            elif ".bam" in str(value):
+                field = 'bam'
+        field = field.upper()
+        try:
+            with open(manifest_file, 'a') as out:
+                out.write(str(field)+"\t"+str(value)+"\n")
+                if to_process not in successful:
+                    successful.append(manifest_file)
+        except Exception as e:
+            if to_process not in failed:
+                failed.append(to_process)
+            print("> ERROR during creation of manifest file: "+str(e))
+    return successful, failed
+
+
+
+def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mode, upload_file_dir=""):
     """
     Run Webin-CLI validation of reads
+    :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
+    :param WEBIN_PASSWORD: Webin submission account password
     :param manifest_file: Path to manifest file used when submitting reads
+    :param mode: Mode of action for Webin-CLI (e.g. validate or submit)
+    :param upload_file_dir: Path of directory housing data files
     :return:
     """
-    output_dir = os.path.join(upload_file_dir, run_id + '-report')      # Directory to house validation report files
-    log_path_err = os.path.join(output_dir, run_id + '.err')
-    log_path_out = os.path.join(output_dir, run_id + '.out')
+    manifest_prefix = os.path.splitext(manifest_file)[0]        # Get a prefix to create unique manifest file names
+
+    output_dir = os.path.join(upload_file_dir, manifest_prefix+ '-report')      # Directory to house validation report files
+    log_path_err = os.path.join(output_dir, manifest_prefix + '.err')
+    log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
-    command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -validate".format(
-        output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir
+    command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
+        output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
     )
     print("*" * 100)
     print("""Command to be executed:
@@ -56,7 +105,7 @@ def webin_cli_validate(WEBIN_USERNAME, WEBIN_PASSWORD, run_id, manifest_file, up
         if err:
             err_file.write(str(err))
             err_file.write('VALIDATION FAILED')
-            run_file.write(run_id+"\n")
+            run_file.write(manifest_file+"\n")
         if out:
             if 'The submission has been validated successfully.' in str(out):
                 out_file.write(str(out))
@@ -65,7 +114,7 @@ def webin_cli_validate(WEBIN_USERNAME, WEBIN_PASSWORD, run_id, manifest_file, up
                 err_file.write(str(out))
                 err_file.write(str(err))
                 err_file.write('VALIDATION FAILED')
-                run_file.write(run_id+"\n")
+                run_file.write(manifest_file+"\n")
 
 
 
@@ -74,16 +123,49 @@ if __name__ == '__main__':
     webin_username = args.username
     webin_password = args.password
 
-
-    if args.spreadsheet:
-        # Batch validate runs using spreadsheet
-        to_validate = pd.read_csv(args.spreadsheet, sep='\t')
-        # for index, row in to_validate.iterrows():
-        #     webin_cli_validate(row[0], row[1], row[2])      # Parallelise this
-        results = Parallel(n_jobs=num_cores)(delayed(webin_cli_validate)(webin_username, webin_password, row[0], row[2], row[1]) for index,row in to_validate.iterrows())
+    to_process = pd.read_excel(args.spreadsheet, header=1)
+    spreadsheet = to_process[~to_process['Unnamed: 0'].str.contains("#", na=False)]     # Remove rows which contain '#' in their column values (i.e. the guide rows)
+    if 'Unnamed: 0' in spreadsheet.columns:
+        runs = spreadsheet.drop('Unnamed: 0', axis='columns')      # Drop the first empty column
     else:
-        # Run validation on script arguments
-        run_id = args.run
-        manifest_file = args.manifest
-        upload_file_dir = args.directory
-        webin_cli_validate(run_id, manifest_file, upload_file_dir)      # Validate the run files in a folder
+        print('Column does not exist, does not require dropping...')
+
+    for index, row in runs.iterrows():
+        successful_files, failed_files = create_manifest(row)       # Create manifest files for each run to be submitted (represented by a row in the user spreadsheet)
+
+    for file in successful_files:
+        webin_cli_validate_submit(webin_username, webin_password, file, args.directory, args.mode)     # Validate/submit runs
+
+
+    # if args.spreadsheet:
+    #     # Batch validate runs using spreadsheet
+    #     to_validate = pd.read_csv(args.spreadsheet, sep='\t')
+    #     # for index, row in to_validate.iterrows():
+    #     #     webin_cli_validate(row[0], row[1], row[2])      # Parallelise this
+    #     results = Parallel(n_jobs=num_cores)(delayed(webin_cli_validate)(webin_username, webin_password, row[0], row[2], row[1]) for index,row in to_validate.iterrows())
+    # else:
+    #     # Run validation on script arguments
+    #     run_id = args.run
+    #     manifest_file = args.manifest
+    #     upload_file_dir = args.directory
+    #     webin_cli_validate(run_id, manifest_file, upload_file_dir)      # Validate the run files in a folder
+
+
+
+# MANIFEST FILE FIELDS:
+# STUDY
+# SAMPLE
+# NAME
+# PLATFORM
+# INSTRUMENT
+# INSERT_SIZE
+# LIBRARY_NAME
+# LIBRARY_SOURCE
+# LIBRARY_SELECTION
+# LIBRARY_STRATEGY
+# DESCRIPTION
+# FASTQ/BAM/CRAM
+
+# INSTALLATION
+# python pandas
+# xlrd-1.2.0
