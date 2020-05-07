@@ -1,2 +1,1 @@
-Run	Directory	Manifest
-test	pathto/fastqs	pathto/Manifest.txt
+study_accession	sample_accession	experiment_name	sequencing_platform	sequencing_instrument	library_name	library_source	library_selection	library_strategy	library_description	insert_size	uploaded file 1	uploaded file 2
