@@ -6,7 +6,7 @@ import multiprocessing
 
 
 ######## Configuration - Assign these values before running the script
-WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.1.0.jar'
+WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.2.3.jar'
 ########
 
 num_cores = multiprocessing.cpu_count()
@@ -25,12 +25,17 @@ def get_args():
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
     parser.add_argument('-p', '--password', help='password for Webin submission account.', type=str, required=True)
     parser.add_argument('-d', '--directory', help='parent directory of data files', type=str, required=False)
+    parser.add_argument('-c', '--centerName', help='FOR BROKER ACCOUNTS ONLY - provide center name', type=str, required=False)
     parser.add_argument('-s', '--spreadsheet', help='name of spreadsheet with metadata', type=str, required=True)
     parser.add_argument('-m', '--mode', type=str, help='options for mode are validate/submit', choices=['validate', 'submit'], nargs='?', required=False)
     args = parser.parse_args()
 
     if args.mode is None:
         args.mode = "validate"
+    if args.directory is None:
+        args.directory=""
+    if args.centerName is None:
+        args.centerName=""
     return args
 
 
@@ -47,8 +52,8 @@ def create_manifest(row, directory=""):
     to_process = experiment_meta.get('uploaded file 1')
     prefix = os.path.splitext(os.path.splitext(to_process)[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
     manifest_file = os.path.join(directory, "Manifest_{}.txt".format(prefix))
-    successful = []
-    failed = []
+    successful = set([])        # Created sets to add to, so unique values are kept in this list
+    failed = set([])
 
     for item in experiment_meta.items():
         field = item[0]
@@ -66,17 +71,17 @@ def create_manifest(row, directory=""):
         try:
             with open(manifest_file, 'a') as out:
                 out.write(str(field)+"\t"+str(value)+"\n")
-                if to_process not in successful:
-                    successful.append(manifest_file)
+            if to_process not in successful:
+                successful.add(manifest_file)
         except Exception as e:
-            if to_process not in failed:
-                failed.append(to_process)
+            if to_process not in set(failed):
+                failed.add(to_process)
             print("> ERROR during creation of manifest file: "+str(e))
-    return successful, failed
+    return list(successful), list(failed)
 
 
 
-def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mode, upload_file_dir=""):
+def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mode, upload_file_dir="", center_name=""):
     """
     Run Webin-CLI validation of reads
     :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
@@ -92,9 +97,17 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mod
     log_path_err = os.path.join(output_dir, manifest_prefix + '.err')
     log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
-    command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
-        output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
-    )
+
+    if center_name == "":
+        command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
+            output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
+        )
+    else:
+        command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName {} -{}".format(
+            output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, center_name,
+            mode
+        )
+
     print("*" * 100)
     print("""Command to be executed:
     {}""".format(command))
@@ -130,11 +143,16 @@ if __name__ == '__main__':
     else:
         print('Column does not exist, does not require dropping...')
 
+    all_successful_files = []
+    all_failed_files = []
     for index, row in runs.iterrows():
-        successful_files, failed_files = create_manifest(row)       # Create manifest files for each run to be submitted (represented by a row in the user spreadsheet)
+        successful_files, failed_files = create_manifest(row, args.directory)       # Create manifest files for each run to be submitted (represented by a row in the user spreadsheet)
+        all_successful_files.append(successful_files)
+        all_failed_files.append(failed_files)
 
-    for file in successful_files:
-        webin_cli_validate_submit(webin_username, webin_password, file, args.directory, args.mode)     # Validate/submit runs
+    for file in all_successful_files:
+        # Need to extract the file path as all_successful_files is a list of lists
+        webin_cli_validate_submit(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName)     # Validate/submit runs
 
 
     # if args.spreadsheet:
