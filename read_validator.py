@@ -6,7 +6,7 @@ import multiprocessing
 
 
 ######## Configuration - Assign these values before running the script
-WEBIN_CLI_JAR_PATH = '/Users/rahman/Documents/Courses_Training/SubmissionTraining/webin-cli-2.2.3.jar'
+WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.2.3.jar'
 ########
 
 num_cores = multiprocessing.cpu_count()
