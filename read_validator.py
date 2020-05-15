@@ -42,10 +42,25 @@ def get_args():
     return args
 
 
+def spreadsheet_format(spreadsheet_file):
+    """
+    Open the spreadsheet depending on the file-type
+    :param spreadsheet_file: Path to spreadsheet
+    :return:
+    """
+    if spreadsheet_file.endswith(".xlsx") or spreadsheet_file.endswith(".xls"):
+        spreadsheet = pd.read_excel(args.spreadsheet, header=0)
+    elif spreadsheet_file.endswith(".csv"):
+        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep=",")
+    elif spreadsheet_file.endswith(".txt"):
+        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep="\t")
+    return spreadsheet
+
+
 def create_manifest(row, directory=""):
     """
     Create a manifest file for each submission
-    :param experiment_meta: Row of metadata from spreadsheet which will be used for the manifest file(s) in submission/validation
+    :param row: Row of metadata from spreadsheet which will be used for the manifest file(s) in submission/validation
     :param directory: Parent directory of data files, to save manifest files to
     :return: List of successful creations of manifest file
     """
@@ -98,13 +113,19 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mod
     :param manifest_file: Path to manifest file used when submitting reads
     :param mode: Mode of action for Webin-CLI (e.g. validate or submit)
     :param upload_file_dir: Path of directory housing data files
+    :param center_name: Center name (for brokered submissions only)
+    :param test: Specify usage of test Webin-CLI
     :return:
     """
-    manifest_prefix = os.path.splitext(manifest_file)[0]        # Get a prefix to create unique manifest file names
+    manifest_prefix = os.path.splitext(os.path.basename(manifest_file))[0]        # Get the file name first and then from this, get everything except the extension
+
+    if upload_file_dir == "":
+        upload_file_dir = "."       # To represent the current working directory
 
     output_dir = os.path.join(upload_file_dir, manifest_prefix+ '-report')      # Directory to house validation report files
     log_path_err = os.path.join(output_dir, manifest_prefix + '.err')
     log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
+    print(log_path_err, log_path_out)
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
 
     if center_name == "":
@@ -148,7 +169,8 @@ if __name__ == '__main__':
     webin_username = args.username
     webin_password = args.password
 
-    to_process = pd.read_excel(args.spreadsheet, header=0)
+    to_process = spreadsheet_format(args.spreadsheet)
+    print(to_process)
     # spreadsheet = to_process[~to_process['Unnamed: 0'].str.contains("#", na=False)]     # Remove rows which contain '#' in their column values (i.e. the guide rows)
     # if 'Unnamed: 0' in spreadsheet.columns:
     #     runs = spreadsheet.drop('Unnamed: 0', axis='columns')      # Drop the first empty column
@@ -162,8 +184,11 @@ if __name__ == '__main__':
         all_successful_files.append(successful_files)
         all_failed_files.append(failed_files)
 
+    # Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test) for file in all_successful_files)
     for file in all_successful_files:
         webin_cli_validate_submit(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
+
+
 
 
     # if args.spreadsheet:
