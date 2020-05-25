@@ -1,12 +1,14 @@
+#!/usr/bin/python3
+
 import argparse, os, subprocess
 import pandas as pd
 from joblib import Parallel, delayed
-from pathlib import Path
 import multiprocessing
 
 
 ######## Configuration - Assign these values before running the script
 WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.2.3.jar'
+parallel = True     # If processing should be carried out in parallel or sequentially
 ########
 
 num_cores = multiprocessing.cpu_count()
@@ -23,7 +25,7 @@ def get_args():
     """
     parser = argparse.ArgumentParser(description="Validate runs submitted")
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
-    parser.add_argument('-p', '--password', help='password for Webin submission account.', type=str, required=True)
+    parser.add_argument('-p', '--password', help='password for Webin submission account', type=str, required=True)
     parser.add_argument('-d', '--directory', help='parent directory of data files', type=str, required=False)
     parser.add_argument('-c', '--centerName', help='FOR BROKER ACCOUNTS ONLY - provide center name', type=str, required=False)
     parser.add_argument('-s', '--spreadsheet', help='name of spreadsheet with metadata', type=str, required=True)
@@ -122,7 +124,7 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mod
     if upload_file_dir == "":
         upload_file_dir = "."       # To represent the current working directory
 
-    output_dir = os.path.join(upload_file_dir, manifest_prefix+ '-report')      # Directory to house validation report files
+    output_dir = os.path.join(upload_file_dir, manifest_prefix + '-report')      # Directory to house validation report files
     log_path_err = os.path.join(output_dir, manifest_prefix + '.err')
     log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
     print(log_path_err, log_path_out)
@@ -170,7 +172,6 @@ if __name__ == '__main__':
     webin_password = args.password
 
     to_process = spreadsheet_format(args.spreadsheet)
-    print(to_process)
     # spreadsheet = to_process[~to_process['Unnamed: 0'].str.contains("#", na=False)]     # Remove rows which contain '#' in their column values (i.e. the guide rows)
     # if 'Unnamed: 0' in spreadsheet.columns:
     #     runs = spreadsheet.drop('Unnamed: 0', axis='columns')      # Drop the first empty column
@@ -184,41 +185,8 @@ if __name__ == '__main__':
         all_successful_files.append(successful_files)
         all_failed_files.append(failed_files)
 
-    # Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test) for file in all_successful_files)
-    for file in all_successful_files:
-        webin_cli_validate_submit(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
-
-
-
-
-    # if args.spreadsheet:
-    #     # Batch validate runs using spreadsheet
-    #     to_validate = pd.read_csv(args.spreadsheet, sep='\t')
-    #     # for index, row in to_validate.iterrows():
-    #     #     webin_cli_validate(row[0], row[1], row[2])      # Parallelise this
-    #     results = Parallel(n_jobs=num_cores)(delayed(webin_cli_validate)(webin_username, webin_password, row[0], row[2], row[1]) for index,row in to_validate.iterrows())
-    # else:
-    #     # Run validation on script arguments
-    #     run_id = args.run
-    #     manifest_file = args.manifest
-    #     upload_file_dir = args.directory
-    #     webin_cli_validate(run_id, manifest_file, upload_file_dir)      # Validate the run files in a folder
-
-
-
-# MANIFEST FILE FIELDS:
-# STUDY
-# SAMPLE
-# NAME
-# PLATFORM
-# INSTRUMENT
-# INSERT_SIZE
-# LIBRARY_NAME
-# LIBRARY_SOURCE
-# LIBRARY_SELECTION
-# LIBRARY_STRATEGY
-# DESCRIPTION
-# FASTQ/BAM/CRAM
-
-# INSTALLATION
-# python pandas
+    if parallel is True:
+        Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test) for file in all_successful_files)
+    else:
+        for file in all_successful_files:
+            webin_cli_validate_submit(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
