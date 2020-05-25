@@ -9,7 +9,12 @@ This script creates manifest files for the user using the metadata specified in 
 To run in batch, the script utilises available cores on the host machine.
 
 ### Usage
-The script can be invoked to run sequentially, however has been created to carry out batch processing. To see the arguments and help in usage of the script:
+Before running the script, ensure you have Webin-CLI installed (https://github.com/enasequence/webin-cli/releases) and provide the full path to the Webin-CLI .jar file in the configuration section at the top of the read_validatory.py script. Additionally, by default, the script processes runs in parallel, however can be run sequentially by changing the parallel value to 'False' in the configuration section. 
+
+To see the arguments and help in usage of the script:
 `python read_validator.py --help`
 
-Before running the script, ensure you have Webin-CLI installed (https://github.com/enasequence/webin-cli/releases) and provide the full path to the Webin-CLI .jar file in the configuration section at the top of the read_validatory.py script.
+Mandatory arguments include Webin submission account username and password and metadata spreadsheet. Note that the `--test/-t` flag can be specified to use Webin test submission services.
+
+###Requirements
+The script requires installation of Python Pandas (https://pandas.pydata.org/). This can be installed in a virtual environment (https://docs.python.org/3/tutorial/venv.html).
