@@ -54,7 +54,7 @@ def spreadsheet_format(spreadsheet_file):
         spreadsheet = pd.read_excel(args.spreadsheet, header=0)
     elif spreadsheet_file.endswith(".csv"):
         spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep=",")
-    elif spreadsheet_file.endswith(".txt"):
+    elif spreadsheet_file.endswith(".txt") or spreadsheet_file.endswith(".tsv"):
         spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep="\t")
     return spreadsheet
 
