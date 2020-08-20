@@ -7,8 +7,8 @@ import multiprocessing
 
 
 ######## Configuration - Assign these values before running the script
-WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-2.2.3.jar'
-parallel = True     # If processing should be carried out in parallel or sequentially
+WEBIN_CLI_JAR_PATH = 'pathto/webin-cli.jar'
+parallel = False     # If processing should be carried out in parallel or sequentially. Set to True to use parallel processing
 ########
 
 num_cores = multiprocessing.cpu_count()
@@ -19,7 +19,7 @@ spreadsheet_column_mapping = {'study_accession': 'study', 'sample_accession': 's
 
 
 def get_args():
-    """
+    """spreadsheet_column_mapping
     Handle script arguments
     :return: Script arguments
     """
@@ -39,8 +39,6 @@ def get_args():
         args.directory=""
     if args.centerName is None:
         args.centerName=""
-    if args.test is None:
-        args.test=""
     return args
 
 
@@ -107,7 +105,7 @@ def create_manifest(row, directory=""):
 
 
 
-def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mode, upload_file_dir="", center_name="", test=""):
+def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mode, upload_file_dir="", center_name="", test):
     """
     Run Webin-CLI validation of reads
     :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
@@ -140,7 +138,7 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mod
             mode
         )
 
-    if test != "":
+    if test is True:
         command = command + " -test"
 
     print("*" * 100)
@@ -172,11 +170,6 @@ if __name__ == '__main__':
     webin_password = args.password
 
     to_process = spreadsheet_format(args.spreadsheet)
-    # spreadsheet = to_process[~to_process['Unnamed: 0'].str.contains("#", na=False)]     # Remove rows which contain '#' in their column values (i.e. the guide rows)
-    # if 'Unnamed: 0' in spreadsheet.columns:
-    #     runs = spreadsheet.drop('Unnamed: 0', axis='columns')      # Drop the first empty column
-    # else:
-    #     print('Column does not exist, does not require dropping...')
 
     all_successful_files = []
     all_failed_files = []
@@ -190,3 +183,7 @@ if __name__ == '__main__':
     else:
         for file in all_successful_files:
             webin_cli_validate_submit(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
+
+
+# INSTALLATION
+# python pandas
