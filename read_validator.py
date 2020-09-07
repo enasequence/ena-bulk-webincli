@@ -111,7 +111,7 @@ def create_manifest(row, directory=""):
 
 
 
-def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, context, mode, upload_file_dir="", center_name="", test):
+def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, context, mode, test, upload_file_dir="", center_name=""):
     """
     Run Webin-CLI validation of reads
     :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
