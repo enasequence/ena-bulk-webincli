@@ -8,7 +8,12 @@ import multiprocessing
 
 ######## Configuration - Assign these values before running the script
 WEBIN_CLI_JAR_PATH = 'pathto/webin-cli.jar'
-parallel = False     # If processing should be carried out in parallel or sequentially. Set to True to use parallel processing
+parallel = False     # If processing should be carried out in parallel or sequentially
+########
+
+######## Installation - requirements
+# Requires Python3
+# Install python package - python pandas latest version (compatible with Python3)
 ########
 
 num_cores = multiprocessing.cpu_count()
@@ -19,16 +24,17 @@ spreadsheet_column_mapping = {'study_accession': 'study', 'sample_accession': 's
 
 
 def get_args():
-    """spreadsheet_column_mapping
+    """
     Handle script arguments
     :return: Script arguments
     """
     parser = argparse.ArgumentParser(description="Validate runs submitted")
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
     parser.add_argument('-p', '--password', help='password for Webin submission account', type=str, required=True)
+    parser.add_argument('-g', '--geneticContext', help='Context for submission, options: genome, transcriptome, sequence, reads, taxrefset', choices=['genome', 'transcriptome', 'sequence', 'reads', 'taxrefset'], nargs='?', required=True)
+    parser.add_argument('-s', '--spreadsheet', help='name of spreadsheet with metadata', type=str, required=True)
     parser.add_argument('-d', '--directory', help='parent directory of data files', type=str, required=False)
     parser.add_argument('-c', '--centerName', help='FOR BROKER ACCOUNTS ONLY - provide center name', type=str, required=False)
-    parser.add_argument('-s', '--spreadsheet', help='name of spreadsheet with metadata', type=str, required=True)
     parser.add_argument('-m', '--mode', type=str, help='options for mode are validate/submit', choices=['validate', 'submit'], nargs='?', required=False)
     parser.add_argument('-t', '--test', help='specify usage of test submission services', action='store_true')
     args = parser.parse_args()
@@ -105,7 +111,7 @@ def create_manifest(row, directory=""):
 
 
 
-def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mode, upload_file_dir="", center_name="", test):
+def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, context, mode, upload_file_dir="", center_name="", test):
     """
     Run Webin-CLI validation of reads
     :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
@@ -129,12 +135,12 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, mod
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
 
     if center_name == "":
-        command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
-            output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
+        command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
+            output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
         )
     else:
-        command = "mkdir -p {} && java -jar {} -context reads -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName {} -{}".format(
-            output_dir, WEBIN_CLI_JAR_PATH, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, center_name,
+        command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName {} -{}".format(
+            output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, center_name,
             mode
         )
 
@@ -179,11 +185,7 @@ if __name__ == '__main__':
         all_failed_files.append(failed_files)
 
     if parallel is True:
-        Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test) for file in all_successful_files)
+        Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.directory, args.centerName, args.test) for file in all_successful_files)
     else:
         for file in all_successful_files:
-            webin_cli_validate_submit(webin_username, webin_password, file[0], args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
-
-
-# INSTALLATION
-# python pandas
+            webin_cli_validate_submit(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
