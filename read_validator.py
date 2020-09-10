@@ -16,7 +16,7 @@ parallel = False     # If processing should be carried out in parallel or sequen
 # Install python package - python pandas latest version (compatible with Python3)
 ########
 
-num_cores = multiprocessing.cpu_count()
+num_cores = 10
 print('Number of cores to use: {}'.format(num_cores))
 
 # Mapping the field names between the submitted user metadata spreadsheet and the manifest file fields
