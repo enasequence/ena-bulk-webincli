@@ -3,11 +3,12 @@
 import argparse, os, subprocess
 import pandas as pd
 from joblib import Parallel, delayed
+from datetime import datetime
 import multiprocessing
 
 
 ######## Configuration - Assign these values before running the script
-WEBIN_CLI_JAR_PATH = 'pathto/webin-cli.jar'
+WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-X.X.X.jar'
 parallel = False     # If processing should be carried out in parallel or sequentially
 ########
 
@@ -55,11 +56,11 @@ def spreadsheet_format(spreadsheet_file):
     :return:
     """
     if spreadsheet_file.endswith(".xlsx") or spreadsheet_file.endswith(".xls"):
-        spreadsheet = pd.read_excel(args.spreadsheet, header=0)
+        spreadsheet = pd.read_excel(args.spreadsheet, header=0, index_col=False)
     elif spreadsheet_file.endswith(".csv"):
-        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep=",")
+        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep=",", index_col=False)
     elif spreadsheet_file.endswith(".txt") or spreadsheet_file.endswith(".tsv"):
-        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep="\t")
+        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep="\t", index_col=False)
     return spreadsheet
 
 
@@ -73,7 +74,7 @@ def create_manifest(row, directory=""):
     row = row.dropna()
     experiment_meta = row.to_dict()     # Gets a row of data and keeps name of column as an index
 
-    to_process = experiment_meta.get('uploaded file 1')
+    to_process = experiment_meta.get('fasta')
     prefix = os.path.splitext(os.path.splitext(to_process)[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
     manifest_file = os.path.join(directory, "Manifest_{}.txt".format(prefix))
     successful = []
@@ -117,13 +118,15 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, con
     :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
     :param WEBIN_PASSWORD: Webin submission account password
     :param manifest_file: Path to manifest file used when submitting reads
+    :param context: The context of submission, e.g. reads
     :param mode: Mode of action for Webin-CLI (e.g. validate or submit)
+    :param test: Specify usage of test Webin-CLI
     :param upload_file_dir: Path of directory housing data files
     :param center_name: Center name (for brokered submissions only)
-    :param test: Specify usage of test Webin-CLI
     :return:
     """
     manifest_prefix = os.path.splitext(os.path.basename(manifest_file))[0]        # Get the file name first and then from this, get everything except the extension
+    now = datetime.now()
 
     if upload_file_dir == "":
         upload_file_dir = "."       # To represent the current working directory
@@ -153,20 +156,30 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, con
     print("*" * 100)
     p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
     out, err = p.communicate()
-    with open(log_path_err, 'w') as err_file, open(log_path_out, 'w') as out_file, open(all_error_runs, 'w') as run_file:
+    with open(log_path_err, 'w') as err_file, open(log_path_out, 'w') as out_file, open(all_error_runs, 'a') as all_errors:
         if err:
-            err_file.write(str(err))
-            err_file.write('VALIDATION FAILED')
-            run_file.write(manifest_file+"\n")
+            err_file.write(str(err.decode('UTF-8')))
+            err_file.write('[{}] VALIDATION FAILED\n'.format(now))
+
+            all_errors.write('*' * 100 + "\n")
+            all_errors.write("[{}] {}\n".format(now, manifest_file))
+            all_errors.write(str(err.decode('UTF-8')) + "\n")
+            all_errors.write('*' * 100 + "\n")
+
         if out:
             if 'The submission has been validated successfully.' in str(out):
-                out_file.write(str(out))
-                out_file.write('VALIDATION SUCCESSFUL')
+                out_file.write('*' * 100 + "\n")
+                out_file.write(str(out.decode('UTF-8')))
+                out_file.write('[{}] VALIDATION SUCCESSFUL\n'.format(now))
+                out_file.write('*' * 100)
             else:
-                err_file.write(str(out))
-                err_file.write(str(err))
-                err_file.write('VALIDATION FAILED')
-                run_file.write(manifest_file+"\n")
+                err_file.write(str(out.decode('UTF-8')))
+                err_file.write('[{}] VALIDATION FAILED\n'.format(now))
+
+                all_errors.write('*' * 100 + "\n")
+                all_errors.write("[{}] {}\n".format(now, manifest_file))
+                all_errors.write(str(out.decode('UTF-8')))
+                all_errors.write('*' * 100 + "\n")
 
 
 
@@ -185,7 +198,7 @@ if __name__ == '__main__':
         all_failed_files.append(failed_files)
 
     if parallel is True:
-        Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.directory, args.centerName, args.test) for file in all_successful_files)
+        Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName) for file in all_successful_files)
     else:
         for file in all_successful_files:
-            webin_cli_validate_submit(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.directory, args.centerName, args.test)     # Validate/submit runs
+            webin_cli_validate_submit(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName)     # Validate/submit runs
