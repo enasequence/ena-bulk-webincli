@@ -1,10 +1,10 @@
 # ena-read-validator
 ### Introduction
-This script validates and/or submits assembly, targeted sequence, read or taxonomic reference data to the ENA using Webin-CLI.
+This script is a wrapper to bulk submit read, un-annotated genome, targeted sequence or taxonomic reference data to the ENA using Webin-CLI.
 
 An example template spreadsheet has been provided (example_template_input.txt). This file is a tab-delimited text file, however the script also consumes spreadsheets in native MS Excel formats (e.g. .xslx) or comma-separated (.csv).
 
-This script creates manifest files for the user using the metadata specified in the spreadsheet. Note that a study or studies and sample(s) must be registered prior to running this script. The study and sample accessions(s) should be defined in the spreadsheet.
+This script creates manifest files for the user using the metadata specified in the spreadsheet. Note that a study or studies and sample(s) must be registered prior to running this script. The study and sample accessions(s) should be defined in the spreadsheet. Visit ENA read the docs (https://ena-docs.readthedocs.io/en/latest/submit/general-guide.html) to obtain information on the manifest file fields for your type of submission which will correlate to the headers in the spreadsheet file.
 
 To run in batch, the script utilises available cores on the host machine.
 
