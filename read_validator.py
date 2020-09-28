@@ -70,7 +70,10 @@ def create_manifest(row, directory=""):
     row = row.dropna()
     experiment_meta = row.to_dict()     # Gets a row of data and keeps name of column as an index
 
-    to_process = experiment_meta.get('fasta')
+    if 'uploaded file 1' in experiment_meta.keys():
+        to_process = experiment_meta.get('uploaded file 1')  # If reads are being submitted, get the name of the file to obtain a prefix
+    elif 'fasta' in experiment_meta.keys():
+        to_process = experiment_meta.get('fasta')  # If an un-annotated genome is being submitted get the name of the fasta file to obtain a prefix
     prefix = os.path.splitext(os.path.splitext(to_process)[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
     manifest_file = os.path.join(directory, "Manifest_{}.txt".format(prefix))
     successful = []
