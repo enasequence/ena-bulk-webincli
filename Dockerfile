@@ -14,4 +14,4 @@ COPY bulk_webincli.py bulk_webincli.py
 RUN chmod 554 bulk_webincli.py && chmod 554 webin-cli.jar
 
 VOLUME /tmp
-ENTRYPOINT python3 bulk_webincli.py
+ENTRYPOINT ["python3", "./bulk_webincli.py"]
