@@ -7,15 +7,11 @@ from datetime import datetime
 import multiprocessing
 
 
-######## Configuration - Assign these values before running the script
-WEBIN_CLI_JAR_PATH = 'pathto/webin-cli-X.X.X.jar'
+######## Configuration
+WEBIN_CLI_JAR_PATH = 'webin-cli.jar'
 parallel = False     # If processing should be carried out in parallel or sequentially
 ########
 
-######## Installation - requirements
-# Requires Python3
-# Install python package - python pandas latest version (compatible with Python3)
-########
 
 num_cores = 10
 print('Number of cores to use: {}'.format(num_cores))
