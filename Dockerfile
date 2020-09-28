@@ -10,8 +10,8 @@ RUN curl -s https://api.github.com/repos/enasequence/webin-cli/releases/latest |
 RUN mv webin-cli-* webin-cli.jar
 RUN echo "Downloading latest Webin-CLI... [COMPLETE]"
 
-COPY read_validator.py read_validator.py
-RUN chmod 554 read_validator.py && chmod 554 webin-cli.jar
+COPY bulk_webincli.py bulk_webincli.py
+RUN chmod 554 bulk_webincli.py && chmod 554 webin-cli.jar
 
 VOLUME /tmp
-ENTRYPOINT python3 read_validator.py
+ENTRYPOINT python3 bulk_webincli.py
