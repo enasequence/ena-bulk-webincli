@@ -25,13 +25,14 @@ def get_args():
     Handle script arguments
     :return: Script arguments
     """
-    parser = argparse.ArgumentParser(prog='bulk_webincli.py', formatter_class=argparse.RawDescriptionHelpFormatter,epilog=textwrap.dedent("""\
-            + =========================================================== +
-            |  ENA Webin-CLI Bulk Submission Tool:                        |
-            |  Python script to handle bulk submission of data through    |
-            |  Webin-CLI.                                                 |    
-            + =========================================================== +
-            """, formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(prog='bulk_webincli.py', formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     epilog="""
+        + =========================================================== +
+        |  ENA Webin-CLI Bulk Submission Tool:                        |
+        |  Python script to handle bulk submission of data through    |
+        |  Webin-CLI.                                                 |    
+        + =========================================================== +
+        """)
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
     parser.add_argument('-p', '--password', help='password for Webin submission account', type=str, required=True)
     parser.add_argument('-g', '--geneticContext', help='Context for submission, options: genome, transcriptome, sequence, reads, taxrefset', choices=['genome', 'transcriptome', 'sequence', 'reads', 'taxrefset'], nargs='?', required=True)
