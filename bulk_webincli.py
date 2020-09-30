@@ -148,7 +148,7 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, con
             output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
         )
     else:
-        command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName {} -{}".format(
+        command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName '{}' -{}".format(
             output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, center_name,
             mode
         )
