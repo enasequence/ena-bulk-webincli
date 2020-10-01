@@ -16,7 +16,10 @@ To ease in usage, the tool has been containerised using [Docker](https://www.doc
 2. Build the docker image:
 `docker build --tag ena-bulk-webincli .`
 3. Ready to go! Run the tool using docker using the following command:
-`docker run --rm ena-bulk-webincli -h` (for help)
+`docker run --rm -v <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli -h` (for help)
+
+<LOCAL_DATA_DIRECTORY> refers to the directory on your machine containing data files to be submitted and the metadata spreadsheet. Below is an example command which would submit read data to the test server:
+`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXX -p XXXX -g reads -s example_template_read.txt -m submit -t`
 
 #### Other
 To use the tool without Docker:

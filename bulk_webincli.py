@@ -8,7 +8,7 @@ import multiprocessing
 
 
 ######## Configuration
-WEBIN_CLI_JAR_PATH = 'webin-cli.jar'        # Full path to Webin-CLI jar file
+WEBIN_CLI_JAR_PATH = '/webin-cli.jar'        # Full path to Webin-CLI jar file
 parallel = False     # If processing should be carried out in parallel or sequentially
 ########
 
