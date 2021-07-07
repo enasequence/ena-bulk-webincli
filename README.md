@@ -6,7 +6,7 @@ The tool requires an appropriate metadata spreadsheet which it uses to generate 
 
 An example template spreadsheet has been provided (example_template_input.txt). This file is a tab-delimited text file, however the script also consumes spreadsheets in native MS Excel formats (e.g. .xslx) or comma-separated (.csv).
 
-### Usage
+### Installation
 
 #### Docker
 To ease in usage, the tool has been containerised using [Docker](https://www.docker.com/). The only requirement is to have Docker [installed](https://docs.docker.com/get-docker/). Once installed, run the following commands to setup:
@@ -18,8 +18,11 @@ To ease in usage, the tool has been containerised using [Docker](https://www.doc
 3. Ready to go! Run the tool using docker using the following command:
 `docker run --rm -v <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli -h` (for help)
 
-<LOCAL_DATA_DIRECTORY> refers to the directory on your machine containing data files to be submitted and the metadata spreadsheet. Below is an example command which would submit read data to the test server:
-`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXX -p XXXX -g reads -s example_template_read.txt -m submit -t`
+<LOCAL_DATA_DIRECTORY> is recommended to be the directory or parent directory on your machine containing your data files to submit. Below is an example command which would submit read data to the test server:
+`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXX -p XXXX -g reads -s example_template_read.txt -d /data -m submit -t`
+
+Note: For data files to be submitted, relative file paths in accordance to `<LOCAL_DATA_DIRECTORY>` must be provided within the input spreadsheet.
+
 
 #### Other
 To use the tool without Docker:
@@ -31,7 +34,15 @@ To use the tool without Docker:
 4. Edit the 'Configuration' section at the top of bulk_webincli.py to include the full path to the Webin-CLI jar file and whether parallel processing should be carried out.
 5. Run the tool using `python bulk_webincli.py --help`(for help)
 
+The script accepts full paths to files (to be submitted e.g. fastq/fasta) within the input spreadsheet. To control location of outputs, a specific directory can be provided using the `--directory/-d` parameter, where the folders listed below will be generated.
+
+### Usage
+
 Mandatory arguments include Webin submission account username and password, genetic context and metadata spreadsheet. Note that the `--test/-t` flag can be specified to use Webin test submission services.
+
+By default, the script utilises two additional directories:
+1. 'manifests' - which houses all generated manifest files and report files.
+2. 'submissions' - housing all validation and submission related reports and files, includes analysis and receipt XMLs of submissions.
 
 ### Dependencies
 The tool runs using [Python3.6+](https://www.python.org/downloads/) and requires installation of [Python Pandas](https://pandas.pydata.org/) and [joblib](https://joblib.readthedocs.io/en/latest/). This can be installed in a [virtual environment](https://docs.python.org/3/tutorial/venv.html).

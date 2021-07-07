@@ -76,13 +76,15 @@ def create_manifest(row, directory=""):
     """
     row = row.dropna()
     experiment_meta = row.to_dict()     # Gets a row of data and keeps name of column as an index
+    manifest_dir = os.path.join(directory, "manifests")
 
     if 'uploaded file 1' in experiment_meta.keys():
         to_process = experiment_meta.get('uploaded file 1')  # If reads are being submitted, get the name of the file to obtain a prefix
     elif 'fasta' in experiment_meta.keys():
         to_process = experiment_meta.get('fasta')  # If an un-annotated genome is being submitted get the name of the fasta file to obtain a prefix
-    prefix = os.path.splitext(os.path.splitext(to_process)[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
-    manifest_file = os.path.join(directory, "Manifest_{}.txt".format(prefix))
+
+    prefix = os.path.splitext(os.path.splitext(os.path.basename(to_process))[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
+    manifest_file = os.path.join(manifest_dir, "Manifest_{}.txt".format(prefix))
     successful = []
     failed = []
 
@@ -107,6 +109,9 @@ def create_manifest(row, directory=""):
         second_col.append(str(value))
     manifest_content = {'field': first_col, 'value': second_col}
     manifest_content = pd.DataFrame.from_dict(manifest_content)
+
+    if not os.path.exists(manifest_dir):
+        os.makedirs(manifest_dir)
 
     try:
         out = manifest_content.to_csv(manifest_file, sep='\t', index=False, header=False)
@@ -137,15 +142,19 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, con
     if upload_file_dir == "":
         upload_file_dir = "."       # To represent the current working directory
 
-    output_dir = os.path.join(upload_file_dir, manifest_prefix + '-report')      # Directory to house validation report files
+    output_dir = os.path.join(upload_file_dir, 'manifests', manifest_prefix + '-report')      # Directory to house validation report files
     log_path_err = os.path.join(output_dir, manifest_prefix + '.err')
     log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
     print(log_path_err, log_path_out)
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
 
+    submissions = os.path.join(upload_file_dir, 'submissions')
+    if not os.path.exists(submissions):
+        os.makedirs(submissions)
+
     if center_name == "":
         command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
-            output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, mode
+            output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, submissions, mode
         )
     else:
         command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName '{}' -{}".format(
