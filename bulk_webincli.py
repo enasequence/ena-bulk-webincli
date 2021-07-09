@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import argparse, os, subprocess
+import argparse, os, subprocess, sys
 import pandas as pd
 from joblib import Parallel, delayed
 from datetime import datetime
@@ -8,13 +8,9 @@ import multiprocessing
 
 
 ######## Configuration
-WEBIN_CLI_JAR_PATH = '/webin-cli.jar'        # Full path to Webin-CLI jar file
-parallel = False     # If processing should be carried out in parallel or sequentially
+WEBIN_CLI_JAR_PATH = 'pathto/webin-cli.jar'        # Full path to Webin-CLI jar file
 ########
 
-
-num_cores = 10
-print('Number of cores to use: {}'.format(num_cores))
 
 # Mapping the field names between the submitted user metadata spreadsheet and the manifest file fields
 spreadsheet_column_mapping = {'study_accession': 'study', 'sample_accession': 'sample', 'experiment_name': 'name', 'sequencing_platform': 'platform', 'sequencing_instrument': 'instrument', 'library_description': 'description'}
@@ -40,6 +36,7 @@ def get_args():
     parser.add_argument('-d', '--directory', help='parent directory of data files', type=str, required=False)
     parser.add_argument('-c', '--centerName', help='FOR BROKER ACCOUNTS ONLY - provide center name', type=str, required=False)
     parser.add_argument('-m', '--mode', type=str, help='options for mode are validate/submit', choices=['validate', 'submit'], nargs='?', required=False)
+    parser.add_argument('-pc', '--parallel', help='Run submissions in parallel and specify the number of cores/threads to use, maximum cores/threads=10', type=int, required=False)
     parser.add_argument('-t', '--test', help='specify usage of test submission services', action='store_true')
     args = parser.parse_args()
 
@@ -49,6 +46,11 @@ def get_args():
         args.directory=""
     if args.centerName is None:
         args.centerName=""
+    if args.parallel is None:
+        args.parallel = False
+    elif not 0 < args.parallel < 10:
+        print('> ERROR: Invalid number of cores/threads provided. This value should be between 1 and 10 (inclusive).')
+        sys.exit()
     return args
 
 
@@ -67,6 +69,15 @@ def spreadsheet_format(spreadsheet_file):
     return spreadsheet
 
 
+def prepare_directories(directory):
+    """
+    Prepare directories for processing of submissions
+    :return:
+    """
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def create_manifest(row, directory=""):
     """
     Create a manifest file for each submission
@@ -77,6 +88,7 @@ def create_manifest(row, directory=""):
     row = row.dropna()
     experiment_meta = row.to_dict()     # Gets a row of data and keeps name of column as an index
     manifest_dir = os.path.join(directory, "manifests")
+    submission_dir = os.path.join(directory, "submissions")
 
     if 'uploaded file 1' in experiment_meta.keys():
         to_process = experiment_meta.get('uploaded file 1')  # If reads are being submitted, get the name of the file to obtain a prefix
@@ -110,8 +122,8 @@ def create_manifest(row, directory=""):
     manifest_content = {'field': first_col, 'value': second_col}
     manifest_content = pd.DataFrame.from_dict(manifest_content)
 
-    if not os.path.exists(manifest_dir):
-        os.makedirs(manifest_dir)
+    prepare_directories(manifest_dir)
+    prepare_directories(submission_dir)
 
     try:
         out = manifest_content.to_csv(manifest_file, sep='\t', index=False, header=False)
@@ -147,10 +159,7 @@ def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, con
     log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
     print(log_path_err, log_path_out)
     all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
-
     submissions = os.path.join(upload_file_dir, 'submissions')
-    if not os.path.exists(submissions):
-        os.makedirs(submissions)
 
     if center_name == "":
         command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
@@ -212,8 +221,9 @@ if __name__ == '__main__':
         all_successful_files.append(successful_files)
         all_failed_files.append(failed_files)
 
-    if parallel is True:
-        Parallel(n_jobs=num_cores)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName) for file in all_successful_files)
+    if args.parallel is not False:
+        print('Number of cores to use: {}'.format(args.parallel))
+        Parallel(n_jobs=args.parallel)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName) for file in all_successful_files)
     else:
         for file in all_successful_files:
             webin_cli_validate_submit(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName)     # Validate/submit runs
