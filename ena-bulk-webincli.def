@@ -1,16 +1,15 @@
 Bootstrap: docker
 From: ubuntu:18.04
-Stage: build
 
-%setup
-    # Install packages
-    apt update && apt install -y curl wget default-jre && apt --assume-yes install python3.6
-    apt-get install -y python3-pandas && apt-get install -y python3-joblib
 
 %files
     bulk_webincli.py bulk_webincli.py
 
 %post
+    # Install packages
+    apt update && apt install -y curl wget default-jre && apt --assume-yes install python3.6
+    apt-get install -y python3-pandas && apt-get install -y python3-joblib
+
     # Install script and software dependencies
     echo "Downloading latest Webin-CLI..."
     curl -s https://api.github.com/repos/enasequence/webin-cli/releases/latest | grep "browser_download_url" | cut -d : -f 2,3 | tr -d \" | wget -qi -

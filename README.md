@@ -23,9 +23,18 @@ To ease in usage, the tool has been containerised using [Docker](https://www.doc
 
 Note: For data files to be submitted, relative file paths in accordance to `<LOCAL_DATA_DIRECTORY>` must be provided within the input spreadsheet.
 
+#### Singularity
+In addition to the Docker container, a [Singularity](https://sylabs.io/guides/3.0/user-guide/index.html) container has also been generated to ease in setup and running the tool. To install Singularity, see their [Installation Guide](https://sylabs.io/guides/3.0/user-guide/installation.html#installation). Once installed,[build the singularity image](https://sylabs.io/guides/3.0/user-guide/build_a_container.html#building-containers-from-singularity-definition-files) using the definition file (`ena-bulk-webincli.def`):
+
+1. Clone the repository:
+`git clone https://github.com/nadimm-rahman/ena-bulk-webincli.git && cd ena-bulk-webincli`
+2. Build the image:
+`sudo singularity build ena-bulk-webincli.sif ena-bulk-webincli.def`
+3. Ready to go! Run the tool using singularity with the following command:
+`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -h` (for help)
 
 #### Other
-To use the tool without Docker:
+To use the tool without a container:
 
 1. Clone the repository:
 `git clone https://github.com/nadimm-rahman/ena-bulk-webincli.git && cd ena-bulk-webincli`
@@ -43,6 +52,31 @@ Mandatory arguments include Webin submission account username and password, gene
 By default, the script utilises two additional directories:
 1. 'manifests' - which houses all generated manifest files and report files.
 2. 'submissions' - housing all validation and submission related reports and files, includes analysis and receipt XMLs of submissions.
+
+##### Examples
+Submitting reads to the test environment (sequential):
+
+`python bulk_webincli.py -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -m submit -t`
+
+`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -m submit -t`
+
+`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -m submit -t`
+<p>&nbsp;</p>
+Submitting genomes to the production environment (in parallel with 5 cores):
+
+`python bulk_webincli.py -u Webin-XXXXX -p XXXXX -g genome -s INPUT_SPREADSHEET -m submit -pc 5`
+
+`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g genome -s INPUT_SPREADSHEET -m submit -pc 5`
+
+`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g genome -s INPUT_SPREADSHEET -m submit -pc 5`
+<p>&nbsp;</p>
+Validating reads, specifying an output directory (sequential):
+
+`python bulk_webincli.py -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -d OUTPUT_DIRECTORY -m validate`
+
+`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -d OUTPUT_DIRECTORY -m validate`
+
+`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -d OUTPUT_DIRECTORY -m validate`
 
 ### Dependencies
 The tool runs using [Python3.6+](https://www.python.org/downloads/) and requires installation of [Python Pandas](https://pandas.pydata.org/) and [joblib](https://joblib.readthedocs.io/en/latest/). This can be installed in a [virtual environment](https://docs.python.org/3/tutorial/venv.html).
