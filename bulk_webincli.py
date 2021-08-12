@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+__author__ = "Nadim Rahman"
+
 import argparse, os, subprocess, sys
 import pandas as pd
 from joblib import Parallel, delayed
@@ -8,7 +10,7 @@ import multiprocessing
 
 
 ######## Configuration
-WEBIN_CLI_JAR_PATH = 'pathto/webin-cli.jar'        # Full path to Webin-CLI jar file
+WEBIN_CLI_JAR_PATH = '/pathto/webin-cli.jar'        # Full path to Webin-CLI jar file
 ########
 
 
@@ -41,7 +43,7 @@ def get_args():
     args = parser.parse_args()
 
     if args.mode is None:
-        args.mode = "validate"
+        args.mode = "validate"      # If no mode is provided, default to Webin-CLI validate mode
     if args.directory is None:
         args.directory=""
     if args.centerName is None:
@@ -58,172 +60,244 @@ def spreadsheet_format(spreadsheet_file):
     """
     Open the spreadsheet depending on the file-type
     :param spreadsheet_file: Path to spreadsheet
-    :return:
+    :return: spreadsheet: Spreadsheet as a data frame to be manipulated
     """
     if spreadsheet_file.endswith(".xlsx") or spreadsheet_file.endswith(".xls"):
-        spreadsheet = pd.read_excel(args.spreadsheet, header=0, index_col=False)
+        spreadsheet = pd.read_excel(spreadsheet_file, header=0, index_col=False)
     elif spreadsheet_file.endswith(".csv"):
-        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep=",", index_col=False)
+        spreadsheet = pd.read_csv(spreadsheet_file, header=0, sep=",", index_col=False)
     elif spreadsheet_file.endswith(".txt") or spreadsheet_file.endswith(".tsv"):
-        spreadsheet = pd.read_csv(args.spreadsheet, header=0, sep="\t", index_col=False)
+        spreadsheet = pd.read_csv(spreadsheet_file, header=0, sep="\t", index_col=False)
     return spreadsheet
 
 
 def prepare_directories(directory):
     """
     Prepare directories for processing of submissions
-    :return:
+    :param directory: Directory to be created
     """
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 
-def create_manifest(row, directory=""):
+class GenerateManifests:
     """
-    Create a manifest file for each submission
-    :param row: Row of metadata from spreadsheet which will be used for the manifest file(s) in submission/validation
-    :param directory: Parent directory of data files, to save manifest files to
-    :return: List of successful creations of manifest file
+    Class object that coordinates the generation of manifest files
     """
-    row = row.dropna()
-    experiment_meta = row.to_dict()     # Gets a row of data and keeps name of column as an index
-    manifest_dir = os.path.join(directory, "manifests")
-    submission_dir = os.path.join(directory, "submissions")
+    def __init__(self, df, directory, context):
+        self.df = df
+        self.directory = directory
+        self.context = context      # The context that Webin-CLI is to be used in (e.g. reads)
+        self.manifest_dir = os.path.join(directory, "manifests")        # Define directory to hold all manifest files
+        self.submission_dir = os.path.join(directory, "submissions")        # Define directory to hold all submission related files and sub-directories
 
-    if 'uploaded file 1' in experiment_meta.keys():
-        to_process = experiment_meta.get('uploaded file 1')  # If reads are being submitted, get the name of the file to obtain a prefix
-    elif 'fasta' in experiment_meta.keys():
-        to_process = experiment_meta.get('fasta')  # If an un-annotated genome is being submitted get the name of the fasta file to obtain a prefix
+    def row_processing(self, row):
+        """
+        Processing a row of data to obtain a dictionary of metadata in a row and a prefix for naming purposes
+        :param row: A row of metadata for submission
+        :return: manifest_file: Location and name of manifest file
+        """
+        row = row.dropna()      # Drop any fields with N/A in specified.
+        row_meta = row.to_dict()        # Gets a row of metadata and keeps name of column as an index
 
-    prefix = os.path.splitext(os.path.splitext(os.path.basename(to_process))[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
-    manifest_file = os.path.join(manifest_dir, "Manifest_{}.txt".format(prefix))
-    successful = []
-    failed = []
+        if self.context == 'reads':     # If reads are being submitted, get the name of the file to obtain a prefix
+            prefix_field = row_meta.get('uploaded file 1')
+        elif self.context == 'genome':      # If an un-annotated genome is being submitted get the name of the fasta file to obtain a prefix
+            prefix_field = row_meta.get('fasta')
 
-    first_col = []
-    second_col = []
-    for item in experiment_meta.items():
-        field = item[0]
-        value = item[1]
-        if field in spreadsheet_column_mapping:
-            field = spreadsheet_column_mapping.get(field)
-        elif field == "insert_size":
-            value = int(value)      # Required to remove any decimal points for the insert size value
-        elif field == "uploaded file 1" or "uploaded file 2":
-            if ".fastq" in str(value) or ".fq" in str(value):
-                field = 'fastq'
-            elif ".cram" in str(value):
-                field = 'cram'
-            elif ".bam" in str(value):
-                field = 'bam'
-        field = field.upper()
-        first_col.append(str(field))
-        second_col.append(str(value))
-    manifest_content = {'field': first_col, 'value': second_col}
-    manifest_content = pd.DataFrame.from_dict(manifest_content)
+        prefix = os.path.splitext(os.path.splitext(os.path.basename(prefix_field))[0])[0]       # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
+        manifest_file = os.path.join(self.manifest_dir, "Manifest_{}.txt".format(prefix))
+        return manifest_file
 
-    prepare_directories(manifest_dir)
-    prepare_directories(submission_dir)
+    def create_manifest(self, metadata_content):
+        """
+        Create manifest file from metadata
+        :param metadata_content: Dictionary of metadata to be converted into a dataframe before submission
+        :return: manifest_content: Dataframe of the manifest file for submission
+        """
+        first_col = []
+        second_col = []
 
-    try:
-        out = manifest_content.to_csv(manifest_file, sep='\t', index=False, header=False)
-        successful.append(manifest_file)
-    except Exception as e:
-        failed.append(to_process)
-        print("> ERROR during creation of manifest file: "+str(e))
-    return successful, failed
+        for item in metadata_content.items():
+            field = item[0]
+            value = item[1]
+            if field in spreadsheet_column_mapping:
+                field = spreadsheet_column_mapping.get(field)       # Convert the name of the field to one that is accepted by Webin-CLI
+            elif field == "insert_size":
+                value = int(value)
+            elif field == "uploaded file 1" or "uploaded file 2":       # Specify the appropriate file type
+                if ".fastq" in str(value) or ".fq" in str(value):
+                    field = "fastq"
+                elif ".cram" in str(value):
+                    field = "cram"
+                elif ".bam" in str(value):
+                    field = "bam"
+            field = field.upper()
+            first_col.append(str(field))
+            second_col.append(str(value))
+        manifest_content = {'field': first_col, 'value': second_col}
+        manifest_content = pd.DataFrame.from_dict(manifest_content)
+        return manifest_content
+
+    def write_manifests(self, manifest_file, manifest_content):
+        """
+        Write out the manifest file
+        :param manifest_file: Path and name of manifest file
+        :param manifest_content: Content of the manifest file
+        :return: successful: List of successfully processed file(s)
+        :return: failed: List of unsuccessfully processed file(s)
+        """
+        # Prepare manifest and submission directories
+        prepare_directories(self.manifest_dir)
+        prepare_directories(self.submission_dir)
+
+        successful = []
+        failed = []
+
+        try:
+            out = manifest_content.to_csv(manifest_file, sep="\t", index=False, header=False)
+            successful.append(manifest_file)
+        except Exception as e:
+            failed.append(manifest_file)
+            print('> ERROR during creation of manifest file: '+str(e))
+        return successful, failed
+
+    def generate_manifests(self):
+        """
+        Coordinate the generation of the manifest files for Webin-CLI submissions
+        :return:
+        """
+        all_successful_files = []
+        all_failed_files = []
+        for index, row in self.df.iterrows():
+            manifest_file = self.row_processing(row)       # Process the row of data - define some variables and files, etc.
+            manifest_content = self.create_manifest(row)       # Create a dataframe of the manifest file content
+            successful_files, failed_files = self.write_manifests(manifest_file, manifest_content)     # Write the dataframe to a file to generate a manifest file
+            all_successful_files.append(successful_files)
+            all_failed_files.append(failed_files)
+        return all_successful_files, all_failed_files
 
 
-
-def webin_cli_validate_submit(WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, context, mode, test, upload_file_dir="", center_name=""):
+class SubmissionWebinCLI:
     """
-    Run Webin-CLI validation of reads
-    :param WEBIN_USERNAME: Webin submission account username (e.g. Webin-XXXXX)
-    :param WEBIN_PASSWORD: Webin submission account password
-    :param manifest_file: Path to manifest file used when submitting reads
-    :param context: The context of submission, e.g. reads
-    :param mode: Mode of action for Webin-CLI (e.g. validate or submit)
-    :param test: Specify usage of test Webin-CLI
-    :param upload_file_dir: Path of directory housing data files
-    :param center_name: Center name (for brokered submissions only)
-    :return:
+    Class object to submit or validate using Webin-CLI
     """
-    manifest_prefix = os.path.splitext(os.path.basename(manifest_file))[0]        # Get the file name first and then from this, get everything except the extension
+    def __init__(self, file, args):
+        self.file = file
+        self.args = args
+        self.submission_dir = os.path.join(self.args.directory, "submissions")        # Define directory to hold all submission related files and sub-directories
+
+    def file_prep(self):
+        """
+        Prepare and define files
+        :return: output_dir: Directory to house report files.
+        :return: log_path_err, log_path_out: Directory and file to store error and output
+        :return: all_error_runs: File which will contain IDs of failed submissions
+        """
+        self.manifest_prefix = os.path.splitext(os.path.basename(self.file))[0]
+
+        if self.args.directory == "":
+            self.args.directory = "."
+
+        self.output_dir = os.path.join(self.args.directory, 'manifests', self.manifest_prefix + '-report')
+        self.log_path_err = os.path.join(self.output_dir, self.manifest_prefix + '.err')
+        self.log_path_out = os.path.join(self.output_dir, self.manifest_prefix + '.out')
+        print(self.log_path_err, self.log_path_out)
+
+        self.all_error_runs = os.path.join(self.args.directory, 'failed_validation.txt')
+
+    def construct_command(self):
+        """
+        Construct the command that is to be run for submission
+        :return: command: String with command to be run for submission
+        """
+        if self.args.centerName == "":
+            command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
+                self.output_dir, WEBIN_CLI_JAR_PATH, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.mode
+            )
+        else:
+            command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName '{}' -{}".format(
+                self.output_dir, WEBIN_CLI_JAR_PATH, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.centerName, self.args.mode
+            )
+
+        if self.args.test is True:
+            command = command + " -test"
+        return command
+
+    def run_command(self, command):
+        """
+        Run the command
+        :param command: Constructed command to be run
+        :return: Standard output and error from the run command
+        """
+        print("*" * 100)
+        print("""Command to be executed:
+        {}""".format(command))
+        print("*" * 100)
+        p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        out, err = p.communicate()
+        return out, err
+
+    def post_process(self, output, error, timestamp):
+        """
+        Post process the output of the run command
+        :param output: The standard output from the run command (.stdout)
+        :param error: The standard error from the run command (.stderr)
+        :param timestamp: The timestamp of the run command
+        """
+        with open(self.log_path_err, 'w') as err_file, open(self.log_path_out, 'w') as out_file, open(self.all_error_runs, 'a') as all_errors:
+            if error:
+                err_file.write(str(error.decode('UTF-8')))
+                err_file.write('[{}] VALIDATION FAILED - {}\n'.format(timestamp, self.file))
+
+                all_errors.write('*' * 100 +"\n")
+                all_errors.write('[{}] {}\n'.format(timestamp, self.manifest_prefix))
+                all_errors.write(str(error.decode('UTF-8')) + "\n")
+                all_errors.write('*' * 100 + "\n")
+
+            if output:
+                if 'The submission has been validated successfully.' in str(output):
+                    out_file.write('*' * 100 + "\n")
+                    out_file.write(str(output.decode('UTF-8')))
+                    out_file.write('[{}] VALIDATION SUCCESSFUL - {}\n'.format(timestamp, self.file))
+                    out_file.write('*' * 100)
+                else:
+                    err_file.write(str(output.decode('UTF-8')))
+                    err_file.write('[{}] VALIDATION FAILED - {}\n'.format(timestamp, self.file))
+
+                    all_errors.write('*' * 100 + "\n")
+                    all_errors.write("[{}] {}\n".format(timestamp, self.manifest_prefix))
+                    all_errors.write(str(output.decode('UTF-8')))
+                    all_errors.write('*' * 100 + "\n")
+
+
+def submit_validate(file, args):
+    """
+    Coordinate the submission or validation using Webin-CLI
+    :param file: File that has been successfully pre-processed - manifest file had been generated successfully
+    :param args: Arguments provided to the tool
+    """
+    webincli_process = SubmissionWebinCLI(file, args)
     now = datetime.now()
-
-    if upload_file_dir == "":
-        upload_file_dir = "."       # To represent the current working directory
-
-    output_dir = os.path.join(upload_file_dir, 'manifests', manifest_prefix + '-report')      # Directory to house validation report files
-    log_path_err = os.path.join(output_dir, manifest_prefix + '.err')
-    log_path_out = os.path.join(output_dir, manifest_prefix + '.out')
-    print(log_path_err, log_path_out)
-    all_error_runs = os.path.join(upload_file_dir, 'failed_validation.txt')      # File to note runs that did not pass validation
-    submissions = os.path.join(upload_file_dir, 'submissions')
-
-    if center_name == "":
-        command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
-            output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, submissions, mode
-        )
-    else:
-        command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName '{}' -{}".format(
-            output_dir, WEBIN_CLI_JAR_PATH, context, WEBIN_USERNAME, WEBIN_PASSWORD, manifest_file, upload_file_dir, output_dir, center_name,
-            mode
-        )
-
-    if test is True:
-        command = command + " -test"
-
-    print("*" * 100)
-    print("""Command to be executed:
-    {}""".format(command))
-    print("*" * 100)
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
-    out, err = p.communicate()
-    with open(log_path_err, 'w') as err_file, open(log_path_out, 'w') as out_file, open(all_error_runs, 'a') as all_errors:
-        if err:
-            err_file.write(str(err.decode('UTF-8')))
-            err_file.write('[{}] VALIDATION FAILED\n'.format(now))
-
-            all_errors.write('*' * 100 + "\n")
-            all_errors.write("[{}] {}\n".format(now, manifest_file))
-            all_errors.write(str(err.decode('UTF-8')) + "\n")
-            all_errors.write('*' * 100 + "\n")
-
-        if out:
-            if 'The submission has been validated successfully.' in str(out):
-                out_file.write('*' * 100 + "\n")
-                out_file.write(str(out.decode('UTF-8')))
-                out_file.write('[{}] VALIDATION SUCCESSFUL\n'.format(now))
-                out_file.write('*' * 100)
-            else:
-                err_file.write(str(out.decode('UTF-8')))
-                err_file.write('[{}] VALIDATION FAILED\n'.format(now))
-
-                all_errors.write('*' * 100 + "\n")
-                all_errors.write("[{}] {}\n".format(now, manifest_file))
-                all_errors.write(str(out.decode('UTF-8')))
-                all_errors.write('*' * 100 + "\n")
+    webincli_process.file_prep()     # Define files used during the submission process
+    command = webincli_process.construct_command()
+    out, err = webincli_process.run_command(command)
+    webincli_process.post_process(out, err, now)
 
 
 
-if __name__ == '__main__':
-    args = get_args()
-    webin_username = args.username
-    webin_password = args.password
+if __name__ == "__main__":
+    args = get_args()       # Get arguments provided to the tool
+    to_process = spreadsheet_format(args.spreadsheet)       # Create a dataframe of data to be processed (submitted or validated)
 
-    to_process = spreadsheet_format(args.spreadsheet)
+    # Generate the manifest files
+    create_manifests = GenerateManifests(to_process, args.directory, args.geneticContext)
+    processed, failed = create_manifests.generate_manifests()
 
-    all_successful_files = []
-    all_failed_files = []
-    for index, row in to_process.iterrows():
-        successful_files, failed_files = create_manifest(row, args.directory)       # Create manifest files for each run to be submitted (represented by a row in the user spreadsheet)
-        all_successful_files.append(successful_files)
-        all_failed_files.append(failed_files)
-
+    # Webin-CLI submission
     if args.parallel is not False:
-        print('Number of cores to use: {}'.format(args.parallel))
-        Parallel(n_jobs=args.parallel)(delayed(webin_cli_validate_submit)(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName) for file in all_successful_files)
+        print('> Number of cores to use: {}'.format(args.parallel))
+        Parallel(n_jobs=args.parallel)(delayed(submit_validate)(process[0], args) for process in processed)
     else:
-        for file in all_successful_files:
-            webin_cli_validate_submit(webin_username, webin_password, file[0], args.geneticContext, args.mode, args.test, args.directory, args.centerName)     # Validate/submit runs
+        for process in processed:
+            submit_validate(process[0], args)
