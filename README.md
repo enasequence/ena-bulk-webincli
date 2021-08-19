@@ -18,10 +18,11 @@ To ease in usage, the tool has been containerised using [Docker](https://www.doc
 3. Ready to go! Run the tool using docker using the following command:
 `docker run --rm -v <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli -h` (for help)
 
-<LOCAL_DATA_DIRECTORY> is recommended to be the directory or parent directory on your machine containing your data files to submit. Below is an example command which would submit read data to the test server:
-`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXX -p XXXX -g reads -s example_template_read.txt -d /data -m submit -t`
+`<LOCAL_DATA_DIRECTORY>` is recommended to be the `ena-bulk-webincli` directory on your local machine. In the example below, docker is used to submit reads to the test environment. The `/workdir` directory on the docker image is the working directory, containing the script, input spreadsheet and data files.
 
-Note: For data files to be submitted, relative file paths in accordance to `<LOCAL_DATA_DIRECTORY>` must be provided within the input spreadsheet.
+`docker run --rm -v pathto/ena-bulk-webincli:/workdir ena-bulk-webincli -u Webin-XXXX -p XXXX -g reads -s /workdir/example_template_read.txt -m submit -t`
+
+Note: For data files to be submitted, relative file paths in accordance to `<LOCAL_DATA_DIRECTORY>` must be provided within the input spreadsheet. In the above example, the spreadsheet described a file `/workdir/data/Test_1.fq`, corresponding to the local file in `<LOCAL_DATA_DIRECTORY>/data/Test_1.fq`.
 
 #### Singularity
 In addition to the Docker container, a [Singularity](https://sylabs.io/guides/3.0/user-guide/index.html) container has also been generated to ease in setup and running the tool. To install Singularity, see their [Installation Guide](https://sylabs.io/guides/3.0/user-guide/installation.html#installation). Once installed,[build the singularity image](https://sylabs.io/guides/3.0/user-guide/build_a_container.html#building-containers-from-singularity-definition-files) using the definition file (`ena-bulk-webincli.def`):

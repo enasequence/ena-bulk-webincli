@@ -9,8 +9,8 @@ from datetime import datetime
 import multiprocessing
 
 
-######## Configuration
-WEBIN_CLI_JAR_PATH = '/pathto/webin-cli.jar'        # Full path to Webin-CLI jar file
+######## Configuration - DOES NOT REQUIRE CHANGES IF USING DOCKER/SINGULARITY
+WEBIN_CLI_JAR_PATH = '/webin-cli.jar'        # Full path to Webin-CLI jar file
 ########
 
 
@@ -280,9 +280,9 @@ def submit_validate(file, args):
     webincli_process = SubmissionWebinCLI(file, args)
     now = datetime.now()
     webincli_process.file_prep()     # Define files used during the submission process
-    command = webincli_process.construct_command()
-    out, err = webincli_process.run_command(command)
-    webincli_process.post_process(out, err, now)
+    command = webincli_process.construct_command()      # Create the command to be processed
+    out, err = webincli_process.run_command(command)        # Run the command and obtain output and error
+    webincli_process.post_process(out, err, now)        # Post-process - save output accordingly
 
 
 

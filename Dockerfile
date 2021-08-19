@@ -14,6 +14,6 @@ COPY bulk_webincli.py bulk_webincli.py
 RUN chmod 554 bulk_webincli.py && chmod 554 webin-cli.jar
 
 # Set working directory to volume where data is housed
-WORKDIR /data
+WORKDIR /workdir
 
 ENTRYPOINT ["python3", "/bulk_webincli.py"]
