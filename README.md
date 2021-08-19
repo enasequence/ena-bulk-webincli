@@ -59,25 +59,25 @@ Submitting reads to the test environment (sequential):
 
 `python bulk_webincli.py -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -m submit -t`
 
-`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -m submit -t`
+`docker run --rm -v localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g reads -s /workdir/INPUT_SPREADSHEET -m submit -t`
 
-`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -m submit -t`
+`singularity run --bind localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s /workdir/INPUT_SPREADSHEET -m submit -t`
 <p>&nbsp;</p>
 Submitting genomes to the production environment (in parallel with 5 cores):
 
 `python bulk_webincli.py -u Webin-XXXXX -p XXXXX -g genome -s INPUT_SPREADSHEET -m submit -pc 5`
 
-`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g genome -s INPUT_SPREADSHEET -m submit -pc 5`
+`docker run --rm -v localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g genome -s /workdir/INPUT_SPREADSHEET -m submit -pc 5`
 
-`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g genome -s INPUT_SPREADSHEET -m submit -pc 5`
+`singularity run --bind localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g genome -s /workdir/INPUT_SPREADSHEET -m submit -pc 5`
 <p>&nbsp;</p>
 Validating reads, specifying an output directory (sequential):
 
 `python bulk_webincli.py -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -d OUTPUT_DIRECTORY -m validate`
 
-`docker run --rm -v pathto/data:/data ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -d OUTPUT_DIRECTORY -m validate`
+`docker run --rm -v localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli -u Webin-XXXXX -p XXXXX -g reads -s /workdir/INPUT_SPREADSHEET -d /workdir/OUTPUT_DIRECTORY -m validate`
 
-`singularity run --bind <LOCAL_DATA_DIRECTORY>:/data ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s INPUT_SPREADSHEET -d OUTPUT_DIRECTORY -m validate`
+`singularity run --bind localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s /workdir/INPUT_SPREADSHEET -d /workdir/OUTPUT_DIRECTORY -m validate`
 
 ### Dependencies
 The tool runs using [Python3.6+](https://www.python.org/downloads/) and requires installation of [Python Pandas](https://pandas.pydata.org/) and [joblib](https://joblib.readthedocs.io/en/latest/). This can be installed in a [virtual environment](https://docs.python.org/3/tutorial/venv.html).
