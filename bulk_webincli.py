@@ -50,7 +50,7 @@ def get_args():
         args.centerName=""
     if args.parallel is None:
         args.parallel = False
-    elif not 0 < args.parallel < 10:
+    elif not 0 < args.parallel <= 10:
         print('> ERROR: Invalid number of cores/threads provided. This value should be between 1 and 10 (inclusive).')
         sys.exit()
     return args
