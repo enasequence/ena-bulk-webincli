@@ -8,12 +8,6 @@ from joblib import Parallel, delayed
 from datetime import datetime
 import multiprocessing
 
-
-######## Configuration - DOES NOT REQUIRE CHANGES IF USING DOCKER/SINGULARITY
-WEBIN_CLI_JAR_PATH = '/webin-cli.jar'        # Full path to Webin-CLI jar file
-########
-
-
 # Mapping the field names between the submitted user metadata spreadsheet and the manifest file fields
 spreadsheet_column_mapping = {'study_accession': 'study', 'sample_accession': 'sample', 'experiment_name': 'name', 'sequencing_platform': 'platform', 'sequencing_instrument': 'instrument', 'library_description': 'description'}
 
@@ -31,6 +25,7 @@ def get_args():
         |  Webin-CLI.                                                 |    
         + =========================================================== +
         """)
+    parser.add_argument('-w', '--webinCliPath', help='Full path to Webin-CLI jar file. Default: "/webin-cli.jar" (for Docker)', default="/webin-cli.jar" type=str, required=True)
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
     parser.add_argument('-p', '--password', help='password for Webin submission account', type=str, required=True)
     parser.add_argument('-g', '--geneticContext', help='Context for submission, options: genome, transcriptome, sequence, reads, taxrefset', choices=['genome', 'transcriptome', 'sequence', 'reads', 'taxrefset'], nargs='?', required=True)
@@ -215,11 +210,11 @@ class SubmissionWebinCLI:
         """
         if self.args.centerName == "":
             command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
-                self.output_dir, WEBIN_CLI_JAR_PATH, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.mode
+                self.output_dir, self.args.webinCliPath, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.mode
             )
         else:
             command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName '{}' -{}".format(
-                self.output_dir, WEBIN_CLI_JAR_PATH, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.centerName, self.args.mode
+                self.output_dir, self.args.webinCliPath, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.centerName, self.args.mode
             )
 
         if self.args.test is True:
