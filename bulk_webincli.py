@@ -40,6 +40,8 @@ def get_args():
     parser.add_argument('-m', '--mode', type=str, help='options for mode are validate/submit', choices=['validate', 'submit'], nargs='?', required=False)
     parser.add_argument('-pc', '--parallel', help='Run submissions in parallel and specify the number of cores/threads to use, maximum cores/threads=10', type=int, required=False)
     parser.add_argument('-t', '--test', help='specify usage of test submission services', action='store_true')
+    parser.add_argument('-a', '--ascp, help='Use Aspera (ascp needs to be in path) instead of FTP when uploading files.', action='store_true')
+
     args = parser.parse_args()
 
     if args.mode is None:
@@ -222,6 +224,8 @@ class SubmissionWebinCLI:
 
         if self.args.test is True:
             command = command + " -test"
+        if self.args.ascp is True:
+            command = command + " -ascp"
         return command
 
     def run_command(self, command):
