@@ -8,12 +8,6 @@ from joblib import Parallel, delayed
 from datetime import datetime
 import multiprocessing
 
-
-######## Configuration - DOES NOT REQUIRE CHANGES IF USING DOCKER/SINGULARITY
-WEBIN_CLI_JAR_PATH = '/webin-cli.jar'        # Full path to Webin-CLI jar file
-########
-
-
 # Mapping the field names between the submitted user metadata spreadsheet and the manifest file fields
 spreadsheet_column_mapping = {'study_accession': 'study', 'sample_accession': 'sample', 'experiment_name': 'name', 'sequencing_platform': 'platform', 'sequencing_instrument': 'instrument', 'library_description': 'description'}
 
@@ -31,6 +25,7 @@ def get_args():
         |  Webin-CLI.                                                 |    
         + =========================================================== +
         """)
+    parser.add_argument('-w', '--webinCliPath', help='Full path to Webin-CLI jar file. Default: "/webin-cli.jar" (for Docker)', default="/webin-cli.jar", type=str)
     parser.add_argument('-u', '--username', help='Webin submission account username (e.g. Webin-XXXXX)', type=str, required=True)
     parser.add_argument('-p', '--password', help='password for Webin submission account', type=str, required=True)
     parser.add_argument('-g', '--geneticContext', help='Context for submission, options: genome, transcriptome, sequence, reads, taxrefset', choices=['genome', 'transcriptome', 'sequence', 'reads', 'taxrefset'], nargs='?', required=True)
@@ -40,6 +35,8 @@ def get_args():
     parser.add_argument('-m', '--mode', type=str, help='options for mode are validate/submit', choices=['validate', 'submit'], nargs='?', required=False)
     parser.add_argument('-pc', '--parallel', help='Run submissions in parallel and specify the number of cores/threads to use, maximum cores/threads=10', type=int, required=False)
     parser.add_argument('-t', '--test', help='specify usage of test submission services', action='store_true')
+    parser.add_argument('-a', '--ascp', help='Use Aspera (ascp needs to be in path) instead of FTP when uploading files.', action='store_true')
+
     args = parser.parse_args()
 
     if args.mode is None:
@@ -50,8 +47,11 @@ def get_args():
         args.centerName=""
     if args.parallel is None:
         args.parallel = False
-    elif not 0 < args.parallel < 10:
+    elif not 0 < args.parallel <= 10:
         print('> ERROR: Invalid number of cores/threads provided. This value should be between 1 and 10 (inclusive).')
+        sys.exit()
+    if os.path.exists(args.webinCliPath) is False:
+        print('> ERROR: Cannot find the Webin CLI jar file. Please set the path to the Webin CLI jar file (--webinCliPath)')
         sys.exit()
     return args
 
@@ -213,15 +213,17 @@ class SubmissionWebinCLI:
         """
         if self.args.centerName == "":
             command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -{}".format(
-                self.output_dir, WEBIN_CLI_JAR_PATH, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.mode
+                self.output_dir, self.args.webinCliPath, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.mode
             )
         else:
             command = "mkdir -p {} && java -jar {} -context {} -userName {} -password {} -manifest {} -inputDir {} -outputDir {} -centerName '{}' -{}".format(
-                self.output_dir, WEBIN_CLI_JAR_PATH, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.centerName, self.args.mode
+                self.output_dir, self.args.webinCliPath, self.args.geneticContext, self.args.username, self.args.password, self.file, self.args.directory, self.submission_dir, self.args.centerName, self.args.mode
             )
 
         if self.args.test is True:
             command = command + " -test"
+        if self.args.ascp is True:
+            command = command + " -ascp"
         return command
 
     def run_command(self, command):
