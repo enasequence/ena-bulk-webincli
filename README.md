@@ -41,8 +41,8 @@ To use the tool without a container:
 `git clone https://github.com/nadimm-rahman/ena-bulk-webincli.git && cd ena-bulk-webincli`
 2. Download the latest version of [Webin-CLI](https://github.com/enasequence/webin-cli/releases) installed.
 3. Download tool dependencies listed below.
-4. Edit the 'Configuration' section at the top of bulk_webincli.py to include the full path to the Webin-CLI jar file and whether parallel processing should be carried out.
-5. Run the tool using `python bulk_webincli.py --help`(for help)
+4. Run the tool using `python bulk_webincli.py --help`(for help).
+5. The path to your downloaded `webin-cli.jar` file should be provided using the `-w [--webinCliPath]`.
 
 The script accepts full paths to files (to be submitted e.g. fastq/fasta) within the input spreadsheet. To control location of outputs, a specific directory can be provided using the `--directory/-d` parameter, where the folders listed below will be generated.
 
@@ -80,4 +80,4 @@ Validating reads, specifying an output directory (sequential):
 `singularity run --bind localpathto/ena-bulk-webincli:/workdir ena-bulk-webincli.sif -u Webin-XXXXX -p XXXXX -g reads -s /workdir/INPUT_SPREADSHEET -d /workdir/OUTPUT_DIRECTORY -m validate`
 
 ### Dependencies
-The tool runs using [Python3.6+](https://www.python.org/downloads/) and requires installation of [Python Pandas](https://pandas.pydata.org/) and [joblib](https://joblib.readthedocs.io/en/latest/). This can be installed in a [virtual environment](https://docs.python.org/3/tutorial/venv.html).
+In addition to [Webin-CLI](https://github.com/enasequence/webin-cli/releases), the tool runs using [Python3.6+](https://www.python.org/downloads/) and requires installation of [Python Pandas](https://pandas.pydata.org/) and [joblib](https://joblib.readthedocs.io/en/latest/). This can be installed in a [virtual environment](https://docs.python.org/3/tutorial/venv.html). If using [Aspera](https://www.ibm.com/products/aspera/downloads) instead of FTP to upload files using Webin-CLI, ensure that you have downloadd Aspera and included it within your `$PATH`.
