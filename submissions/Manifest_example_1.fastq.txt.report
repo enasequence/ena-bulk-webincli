@@ -1,2 +1,0 @@
-INFO: Field "LIBRARY_SOURCE" value "Genomic" was corrected to "GENOMIC". [manifest file: /Users/ocathail/Documents/GitHub/ena-bulk-webincli/manifests/Manifest_example_1.fastq.txt, line number: 7, field: LIBRARY_SOURCE, value: Genomic]
-INFO: Field "LIBRARY_SELECTION" value "random" was corrected to "RANDOM". [manifest file: /Users/ocathail/Documents/GitHub/ena-bulk-webincli/manifests/Manifest_example_1.fastq.txt, line number: 8, field: LIBRARY_SELECTION, value: random]
