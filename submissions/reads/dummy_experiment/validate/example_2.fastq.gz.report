@@ -1,0 +1,3 @@
+INFO: Collected 2161660 reads [file: /Users/ocathail/Documents/test_data/example_2.fastq.gz]
+INFO: Collected 3 read labels: [1, 2, /Users/ocathail/Documents/test_data/example_2.fastq.gz] [file: /Users/ocathail/Documents/test_data/example_2.fastq.gz]
+INFO: Has possible duplicate(s): true [file: /Users/ocathail/Documents/test_data/example_2.fastq.gz]

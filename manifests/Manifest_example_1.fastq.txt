@@ -1,0 +1,13 @@
+STUDY	PRJDB11095
+SAMPLE	SAMD00277110
+NAME	dummy experiment
+PLATFORM	ILLUMINA
+INSTRUMENT	Illumina MiSeq
+LIBRARY_NAME	random
+LIBRARY_SOURCE	Genomic
+LIBRARY_SELECTION	random
+LIBRARY_STRATEGY	WGS
+DESCRIPTION	random
+INSERT_SIZE	150
+FASTQ	/Users/ocathail/Documents/test_data/example_1.fastq.gz
+FASTQ	/Users/ocathail/Documents/test_data/example_2.fastq.gz

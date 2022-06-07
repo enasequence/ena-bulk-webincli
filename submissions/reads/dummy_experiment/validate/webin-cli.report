@@ -1,0 +1,207 @@
+INFO: Collected 2161660 reads [file: /Users/ocathail/Documents/test_data/example_1.fastq.gz]
+INFO: Collected 3 read labels: [1, 2, /Users/ocathail/Documents/test_data/example_1.fastq.gz] [file: /Users/ocathail/Documents/test_data/example_1.fastq.gz]
+INFO: Has possible duplicate(s): false [file: /Users/ocathail/Documents/test_data/example_1.fastq.gz]
+INFO: Collected 2161660 reads [file: /Users/ocathail/Documents/test_data/example_2.fastq.gz]
+INFO: Collected 3 read labels: [1, 2, /Users/ocathail/Documents/test_data/example_2.fastq.gz] [file: /Users/ocathail/Documents/test_data/example_2.fastq.gz]
+INFO: Has possible duplicate(s): true [file: /Users/ocathail/Documents/test_data/example_2.fastq.gz]
+ERROR: When submitting paired reads using two Fastq files the reads must follow Illumina paired read naming conventions. This was not the case for the submitted Fastq files: [Luk.ac.ebi.ena.readtools.webin.cli.rawreads.RawReadsFile;@578486a3. Unable to determine pairing from set: 1,2,/Users/ocathail/Documents/test_data/example_2.fastq.gz,/Users/ocathail/Documents/test_data/example_1.fastq.gz
+ERROR: Multiple (2) occurrences of read name "DRR272391.1" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 1, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 1]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.2" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 2, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 2]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.3" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 3, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 3]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.4" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 4, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 4]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.5" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 5, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 5]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.6" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 6, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 6]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.7" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 7, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 7]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.8" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 8, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 8]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.9" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 9, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 9]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.10" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 10, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 10]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.11" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 11, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 11]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.12" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 12, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 12]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.13" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 13, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 13]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.14" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 14, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 14]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.15" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 15, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 15]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.16" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 16, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 16]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.17" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 17, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 17]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.18" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 18, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 18]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.19" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 19, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 19]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.20" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 20, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 20]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.21" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 21, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 21]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.22" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 22, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 22]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.23" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 23, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 23]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.24" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 24, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 24]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.25" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 25, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 25]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.26" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 26, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 26]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.27" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 27, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 27]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.28" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 28, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 28]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.29" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 29, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 29]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.30" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 30, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 30]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.31" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 31, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 31]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.32" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 32, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 32]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.33" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 33, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 33]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.34" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 34, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 34]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.35" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 35, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 35]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.36" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 36, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 36]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.37" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 37, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 37]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.38" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 38, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 38]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.39" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 39, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 39]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.40" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 40, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 40]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.41" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 41, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 41]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.42" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 42, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 42]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.43" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 43, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 43]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.44" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 44, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 44]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.45" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 45, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 45]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.46" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 46, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 46]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.47" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 47, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 47]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.48" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 48, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 48]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.49" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 49, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 49]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.50" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 50, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 50]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.51" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 51, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 51]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.52" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 52, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 52]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.53" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 53, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 53]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.54" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 54, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 54]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.55" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 55, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 55]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.56" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 56, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 56]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.57" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 57, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 57]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.58" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 58, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 58]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.59" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 59, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 59]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.60" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 60, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 60]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.61" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 61, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 61]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.62" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 62, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 62]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.63" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 63, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 63]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.64" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 64, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 64]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.65" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 65, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 65]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.66" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 66, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 66]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.67" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 67, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 67]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.68" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 68, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 68]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.69" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 69, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 69]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.70" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 70, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 70]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.71" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 71, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 71]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.72" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 72, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 72]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.73" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 73, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 73]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.74" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 74, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 74]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.75" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 75, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 75]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.76" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 76, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 76]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.77" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 77, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 77]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.78" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 78, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 78]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.79" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 79, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 79]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.80" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 80, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 80]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.81" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 81, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 81]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.82" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 82, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 82]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.83" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 83, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 83]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.84" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 84, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 84]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.85" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 85, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 85]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.86" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 86, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 86]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.87" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 87, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 87]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.88" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 88, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 88]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.89" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 89, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 89]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.90" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 90, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 90]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.91" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 91, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 91]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.92" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 92, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 92]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.93" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 93, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 93]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.94" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 94, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 94]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.95" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 95, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 95]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.96" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 96, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 96]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.97" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 97, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 97]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.98" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 98, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 98]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.99" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 99, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 99]
+
+ERROR: Multiple (2) occurrences of read name "DRR272391.100" at: [/Users/ocathail/Documents/test_data/example_1.fastq.gz, read 100, /Users/ocathail/Documents/test_data/example_2.fastq.gz, read 100]
+
