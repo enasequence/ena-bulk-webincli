@@ -7,7 +7,10 @@ import pandas as pd
 from joblib import Parallel, delayed
 from datetime import datetime
 from pathlib import Path
+import fnmatch
+import os
 import multiprocessing
+import glob
 
 # Mapping the field names between the submitted user metadata spreadsheet and the manifest file fields
 spreadsheet_column_mapping = {
@@ -129,7 +132,51 @@ def get_args():
     if Path(args.webinCliPath).exists() is False:
         print("> ERROR: Cannot find the Webin CLI jar file. Please set the path to the Webin CLI jar file (--webinCliPath)")
         sys.exit()
+    if not fnmatch.fnmatch(args.webinCliPath, '*.jar'):
+        webinCli_file = webinCli_latest_download(args.webinCliPath)
+        args.webinCliPath = f'{args.webinCliPath}/{webinCli_file}'
     return args
+
+def webinCli_latest_download(webinCli_dir):
+    """
+        Checking and retrieving the latest Webin Cli jar file
+        :param: webinCli_dir: directory path for webin-cli
+        :return: Latest Webin Cli jar file name
+    """
+    print('checking if webin-cli is the latest release')
+    download_command = 'curl -s https://api.github.com/repos/enasequence/webin-cli/releases/latest |  grep "browser_download_url"  | head -1 | cut -d : -f 2,3 | tr -d \\"'
+    sp = subprocess.Popen(download_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    out, err = sp.communicate()
+    webinCli_file_name = out.decode().split("/")
+    stdoutOrigin = sys.stdout
+    webinCli_list = glob.glob(f'{webinCli_dir}/*.jar')
+    latest_file_name = webinCli_file_name[8].strip()
+    print(webinCli_list)
+    if len(webinCli_list)!= 0:
+        for f in webinCli_list:
+            dir_file_name = os.path.basename(f)
+            if dir_file_name == latest_file_name:
+                print("webin-cli software is up to date")
+                return dir_file_name
+            else:
+                print('downloading the latest release of webin-cli...................................................................')
+                command = '{} | wget --show-progress -qi - --directory-prefix={}'.format(download_command, webinCli_dir)
+                sp = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = sp.communicate()
+                sys.stderr.write(out.decode())
+                sys.stderr.write(err.decode())
+                stdoutOrigin = sys.stdout
+                return latest_file_name
+    else:
+        print('downloading the latest release of webin-cli...................................................................')
+        command = '{} | wget --show-progress -qi - --directory-prefix={}'.format(download_command, webinCli_dir)
+        sp = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = sp.communicate()
+        sys.stderr.write(out.decode())
+        sys.stderr.write(err.decode())
+        stdoutOrigin = sys.stdout
+        return latest_file_name
+
 
 
 def spreadsheet_format(spreadsheet_file):
@@ -271,6 +318,8 @@ class SubmissionWebinCLI:
         :return: log_path_err, log_path_out: Directory and file to store error and output
         :return: all_error_runs: File which will contain IDs of failed submissions
         """
+        now = datetime.now()
+        now_str = now.strftime("%d%m%y-%H%M")  # datetime in minutes format
         self.manifest_prefix = Path(self.file).stem
         # self.manifest_prefix = os.path.splitext(os.path.basename(self.file))[0]
 
@@ -283,6 +332,7 @@ class SubmissionWebinCLI:
         print(self.log_path_err, self.log_path_out)
 
         self.all_error_runs = Path(self.args.directory) / "failed_validation.txt"
+        self.log_path_total = Path(self.args.directory) / "submissions" / f"log_total_{now_str}.txt"
 
     def construct_command(self):
         """
@@ -341,7 +391,7 @@ class SubmissionWebinCLI:
         :param error: The standard error from the run command (.stderr)
         :param timestamp: The timestamp of the run command
         """
-        with open(self.log_path_err, "w") as err_file, open(self.log_path_out, "w") as out_file, open(self.all_error_runs, "a") as all_errors:
+        with open(self.log_path_err, "w") as err_file, open(self.log_path_out, "w") as out_file, open(self.all_error_runs, "a") as all_errors, open(self.log_path_total, "a") as logs:
             if error:
                 err_file.write(str(error.decode("UTF-8")))
                 err_file.write("[{}] VALIDATION FAILED - {}\n".format(timestamp, self.file))
@@ -349,6 +399,7 @@ class SubmissionWebinCLI:
                 all_errors.write("[{}] {}\n".format(timestamp, self.manifest_prefix))
                 all_errors.write(str(error.decode("UTF-8")) + "\n")
                 all_errors.write("*" * 100 + "\n")
+                logs.write(str(error.decode("UTF-8")))
 
             if output:
                 if "The submission has been validated successfully." in str(output):
@@ -363,6 +414,8 @@ class SubmissionWebinCLI:
                     all_errors.write("[{}] {}\n".format(timestamp, self.manifest_prefix))
                     all_errors.write(str(output.decode("UTF-8")))
                     all_errors.write("*" * 100 + "\n")
+                    logs.write(str(output.decode("UTF-8")))
+
 
 
 def submit_validate(file, args):
@@ -379,9 +432,12 @@ def submit_validate(file, args):
     webincli_process.post_process(out, err, now)  # Post-process - save output accordingly
 
 
+
 if __name__ == "__main__":
+
     args = get_args()  # Get arguments provided to the tool
-    to_process = spreadsheet_format(args.spreadsheet)  # Create a dataframe of data to be processed (submitted or validated)
+    to_process = spreadsheet_format(
+        args.spreadsheet)  # Create a dataframe of data to be processed (submitted or validated)
 
     # Generate the manifest files
     create_manifests = GenerateManifests(to_process, args.directory, args.geneticContext)
@@ -394,3 +450,5 @@ if __name__ == "__main__":
     else:
         for process in processed:
             submit_validate(process[0], args)
+
+
