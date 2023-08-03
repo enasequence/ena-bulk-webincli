@@ -132,7 +132,7 @@ def get_args():
     if Path(args.webinCliPath).exists() is False:
         print("> ERROR: Cannot find the Webin CLI jar file. Please set the path to the Webin CLI jar file (--webinCliPath)")
         sys.exit()
-    if not fnmatch.fnmatch(args.webinCliPath, '*.jar'):
+    if not fnmatch.fnmatch(args.webinCliPath, '*.jar'): # check if Webin-CLI jar file already exist
         webinCli_file = webinCli_latest_download(args.webinCliPath)
         args.webinCliPath = f'{args.webinCliPath}/{webinCli_file}'
     return args
@@ -144,6 +144,7 @@ def webinCli_latest_download(webinCli_dir):
         :return: Latest Webin Cli jar file name
     """
     print('checking if webin-cli is the latest release')
+    # check if Webin-CLI jar file latest release already exist
     download_command = 'curl -s https://api.github.com/repos/enasequence/webin-cli/releases/latest |  grep "browser_download_url"  | head -1 | cut -d : -f 2,3 | tr -d \\"'
     sp = subprocess.Popen(download_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = sp.communicate()
@@ -151,14 +152,13 @@ def webinCli_latest_download(webinCli_dir):
     stdoutOrigin = sys.stdout
     webinCli_list = glob.glob(f'{webinCli_dir}/*.jar')
     latest_file_name = webinCli_file_name[8].strip()
-    print(webinCli_list)
     if len(webinCli_list)!= 0:
         for f in webinCli_list:
             dir_file_name = os.path.basename(f)
-            if dir_file_name == latest_file_name:
+            if dir_file_name == latest_file_name: # if the Webin-Cli jar file is up to date, return the file path
                 print("webin-cli software is up to date")
                 return dir_file_name
-            else:
+            else: # if the Webin-Cli jar file is not up to date, download the latest release
                 print('downloading the latest release of webin-cli...................................................................')
                 command = '{} | wget --show-progress -qi - --directory-prefix={}'.format(download_command, webinCli_dir)
                 sp = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -167,7 +167,7 @@ def webinCli_latest_download(webinCli_dir):
                 sys.stderr.write(err.decode())
                 stdoutOrigin = sys.stdout
                 return latest_file_name
-    else:
+    else: # if the Webin-Cli jar file doesnt exist, download the latest release
         print('downloading the latest release of webin-cli...................................................................')
         command = '{} | wget --show-progress -qi - --directory-prefix={}'.format(download_command, webinCli_dir)
         sp = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
