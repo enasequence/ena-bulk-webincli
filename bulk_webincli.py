@@ -176,12 +176,9 @@ class GenerateManifests:
         """
         row = row.dropna()  # Drop any fields with N/A in specified.
         row_meta = row.to_dict() # Gets a row of metadata and keeps name of column as an index
+        
+        prefix = row_meta.get("experiment_name").replace(" ", "_").replace("/", "_")
 
-        if (self.context == "reads"):  # If reads are being submitted, get the name of the file to obtain a prefix
-            prefix_field = row_meta.get("uploaded file 1")
-        elif (self.context == "genome"):  # If an un-annotated genome is being submitted get the name of the fasta file to obtain a prefix
-            prefix_field = row_meta.get("fasta")
-        prefix = Path(prefix_field).stem  # Get just the name of the run without the file extensions (indexing 0 required as both are tuples)
         manifest_file = Path(self.manifest_dir) / "Manifest_{}.txt".format(prefix)
         return manifest_file
 
